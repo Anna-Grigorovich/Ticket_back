@@ -14,6 +14,7 @@ export class EventsService {
   constructor(
       @InjectModel(Event.name) private eventModel: Model<EventDocument>
   ){}
+
   async create(createEventDto: CreateEventDto) {
     return await new this.eventModel(createEventDto).save();
   }

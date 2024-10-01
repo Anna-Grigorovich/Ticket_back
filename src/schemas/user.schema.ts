@@ -10,8 +10,6 @@ export class User {
     login: string;
     @Prop({ required: true })
     password: string;
-    @Prop()
-    refresh: string;
     @Prop({default: EUserRoles.SELLER})
     role: string;
 }

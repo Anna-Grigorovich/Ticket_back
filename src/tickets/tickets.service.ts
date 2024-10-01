@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
+import {InjectModel} from "@nestjs/mongoose";
+import {Model, Types} from "mongoose";
+import {Event, EventDocument} from "../schemas/event.schema";
+import {Ticket, TicketDocument} from "../schemas/ticket.schema";
+import ObjectId = Types.ObjectId;
 
 @Injectable()
 export class TicketsService {
-  create(createTicketDto: CreateTicketDto) {
-    return 'This action adds a new ticket';
+  constructor(
+      @InjectModel(Event.name) private eventModel: Model<EventDocument>,
+      @InjectModel(Ticket.name) private ticketModel: Model<TicketDocument>
+  ){}
+
+  create(event: ObjectId, code: number, discount: number, data: string) {
+    new this.ticketModel({event, code, discount, data}).save()
   }
 
-  findAll() {
-    return `This action returns all tickets`;
+  findAll(eventId: string) {
+    return this.eventModel.findById(new ObjectId(eventId)).populate('tickets').exec()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ticket`;
-  }
-
-  update(id: number, updateTicketDto: UpdateTicketDto) {
-    return `This action updates a #${id} ticket`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
+  findOne(eventId: string, code: number) {
+    return this.ticketModel.findOne({code, event: new ObjectId(eventId)}).exec()
   }
 }
