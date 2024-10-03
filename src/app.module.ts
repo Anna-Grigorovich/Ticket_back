@@ -6,6 +6,8 @@ import {appConfig} from "./config/app.config";
 import {MongooseModule} from "@nestjs/mongoose";
 import { EventsModule } from './events/events.module';
 import { TicketsModule } from './tickets/tickets.module';
+import {ServeStaticModule} from "@nestjs/serve-static";
+import * as path from "node:path";
 
 @Module({
   imports: [
@@ -19,6 +21,16 @@ import { TicketsModule } from './tickets/tickets.module';
         uri: configService.get<string>('mongoConnectURI')
       }),
       inject: [ConfigService],
+    }),
+    ServeStaticModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        {
+          rootPath: path.join(process.cwd(), configService.get<string>('imagesPath')),
+          serveRoot: '/images',
+        },
+      ],
     }),
     UsersModule,
     AuthModule,

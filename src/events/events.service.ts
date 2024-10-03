@@ -8,11 +8,13 @@ import ObjectId = Types.ObjectId;
 import {Jimp} from "jimp";
 import * as path from "node:path";
 import * as fs from 'fs';
+import {ConfigService} from "@nestjs/config";
 
 @Injectable()
 export class EventsService {
   constructor(
-      @InjectModel(Event.name) private eventModel: Model<EventDocument>
+      @InjectModel(Event.name) private eventModel: Model<EventDocument>,
+      private configService: ConfigService
   ){}
 
   async create(createEventDto: CreateEventDto) {
@@ -39,19 +41,24 @@ export class EventsService {
 
   async uploadFile(id: string, file: Express.Multer.File){
     try {
-      const outputFilePath = path.join(__dirname,'../', 'files');
+      const outputFilePath = path.join(
+          process.cwd(),
+          this.configService.get('imagesPath')
+      );
       if (!fs.existsSync(outputFilePath)) {
         fs.mkdirSync(outputFilePath, { recursive: true });
       }
+
       const image = await Jimp.read(file.buffer);
       image.resize({w: 400});
-      await image.write(`${outputFilePath}/${id}.jpg`);
+      const filePath = path.join(outputFilePath, `${id}.jpg`);
+      // @ts-ignore
+      await image.write(filePath);
       return {
         message: 'Image uploaded successfully!',
-        filePath: outputFilePath,
+        path: `images/${id}.jpg`,
       };
     } catch (error) {
-      console.error('Error processing the image:', error);
       throw new Error('Failed to process the image');
     }
   }
