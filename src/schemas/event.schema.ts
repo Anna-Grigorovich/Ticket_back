@@ -15,7 +15,7 @@ export class Event {
     @Prop()
     description: string;
     @Prop()
-    date: string;
+    date: number;
     @Prop()
     price: number;
     @Prop()

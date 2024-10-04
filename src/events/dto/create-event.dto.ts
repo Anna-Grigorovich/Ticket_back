@@ -9,8 +9,8 @@ export class CreateEventDto {
     address: string;
     @IsNotEmpty()
     description: string;
-    @IsString()
-    date: string;
+    @IsNumber()
+    date: number;
     @IsNumber()
     price: string;
     image: string;

@@ -8,12 +8,14 @@ import {
   Delete,
   UploadedFile,
   UseInterceptors,
-  ParseFilePipe, MaxFileSizeValidator, FileTypeValidator
+  ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Query
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import {FileInterceptor} from "@nestjs/platform-express";
+import {FindUserDto} from "../users/dto/find-users.dto";
+import {FindEventDto} from "./dto/find-event.dto";
 
 @Controller('events')
 export class EventsController {
@@ -44,8 +46,8 @@ export class EventsController {
   }
 
   @Get()
-  findAll() {
-    return this.eventsService.findAll();
+  findAll(@Query() params: FindEventDto) {
+    return this.eventsService.findAll(params);
   }
 
   @Patch(':id')

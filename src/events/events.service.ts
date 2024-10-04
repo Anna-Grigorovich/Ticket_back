@@ -9,6 +9,7 @@ import {Jimp} from "jimp";
 import * as path from "node:path";
 import * as fs from 'fs';
 import {ConfigService} from "@nestjs/config";
+import {FindEventDto} from "./dto/find-event.dto";
 
 @Injectable()
 export class EventsService {
@@ -21,8 +22,41 @@ export class EventsService {
     return await new this.eventModel(createEventDto).save();
   }
 
-  async findAll() {
-    return await this.eventModel.find({}).exec();
+  async findAll(params: FindEventDto) {
+    const { search, dateFrom, dateTo, skip = 0, limit = 10 } = params;
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { title: new RegExp(search, 'i') },        // Case-insensitive search for title
+        { place: new RegExp(search, 'i') },        // Case-insensitive search for place
+        { address: new RegExp(search, 'i') },      // Case-insensitive search for address
+        { description: new RegExp(search, 'i') }   // Case-insensitive search for description
+      ];
+    }
+
+    if (dateFrom || dateTo) {
+      query.date = {};
+      if (dateFrom) {
+        query.date.$gte = dateFrom; // Greater than or equal to dateFrom
+      }
+      if (dateTo) {
+        query.date.$lte = dateTo;   // Less than or equal to dateTo
+      }
+    }
+
+    const events = await this.eventModel
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+    const total = await this.eventModel.countDocuments(query).exec();
+
+    return {
+      total,
+      events,
+    };
   }
 
   async findOne(id: string) {

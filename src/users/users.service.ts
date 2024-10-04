@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import {omit} from "lodash";
 import {UpdateUserDto} from "./dto/update-user.dto";
 import ObjectId = Types.ObjectId;
+import {FindUserDto} from "./dto/find-users.dto";
 
 @Injectable()
 export class UsersService {
@@ -53,7 +54,26 @@ export class UsersService {
         return await this.userModel.findById(new ObjectId(id)).select('-password').exec()
     }
 
-    async getAllUsers(){
-        return await this.userModel.find({}).select('-password').exec()
+    async getAllUsers(params: FindUserDto){
+        const { skip = 0, limit = 10, login, role } = params;
+        const query: any = {};
+        if (login) {
+            query.login = new RegExp(login, 'i');
+        }
+        if (role) {
+            query.role = role;
+        }
+
+        const users = await this.userModel
+            .find(query)
+            .select('-password')   // Exclude the password field
+            .skip(skip)
+            .limit(limit)
+            .exec();
+        const total = await this.userModel.countDocuments(query).exec();
+        return {
+            total,
+            users,
+        };
     }
 }
