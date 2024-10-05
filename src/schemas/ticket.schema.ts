@@ -14,6 +14,8 @@ export class Ticket {
     discount: number;
     @Prop()
     data: string;
+    @Prop({default: false})
+    scanned: boolean;
 }
 
 export const TicketSchema = SchemaFactory.createForClass(Ticket);
