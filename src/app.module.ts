@@ -8,6 +8,8 @@ import { EventsModule } from './events/events.module';
 import { TicketsModule } from './tickets/tickets.module';
 import {ServeStaticModule} from "@nestjs/serve-static";
 import * as path from "node:path";
+import {APP_GUARD} from "@nestjs/core";
+import {RolesGuard} from "./auth/roles.guard";
 
 @Module({
   imports: [

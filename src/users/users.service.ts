@@ -20,6 +20,11 @@ export class UsersService {
         return user;
     }
 
+    async getUserRoleByID(id: string){
+        const user: UserDocument = await this.userModel.findById(id).select('role').exec();
+        return user;
+    }
+
     async create(login: string, hash: string): Promise<any> {
         const user = new this.userModel({
             login: login,
