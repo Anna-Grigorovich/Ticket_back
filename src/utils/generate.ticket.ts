@@ -26,7 +26,7 @@ const formatTimestampToUkrainian = (timestamp: number) => {
     return formattedDate;
 };
 
-export const createPdfWithLocalImages = async (ticketId: string, eventData: Event, posterPath: string, outputPath: string) => {
+export const createTicketPdf = async (ticketId: string, eventData: Event, posterPath: string, outputPath: string) => {
     const doc = new PDFDocument({size: 'A4', margins: { top: 50, left: 50, right: 50, bottom: 0 }});
     doc.registerFont('Play', './fonts/Play-Regular.ttf');
     doc.registerFont('PlayBold', './fonts/Play-Bold.ttf');
@@ -86,7 +86,7 @@ export const createPdfWithLocalImages = async (ticketId: string, eventData: Even
     doc.end();
 };
 
-// createPdfWithLocalImages(
+// createTicketPdf(
 //     '64b1f00c2c16b8e25b485ff7',
 //     {title: "Концерт жаби і гадюки", place: "Жопа кабана", address: "", date: Date.now(), price: 250, image: '', description: ''},
 //     'F:/projects/kibalnik_back/uploads/images/67016312dde4a9a228bbb64d.jpg',
