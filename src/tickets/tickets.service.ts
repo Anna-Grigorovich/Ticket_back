@@ -22,7 +22,7 @@ export class TicketsService {
 
   ){
     this.transporter = nodemailer.createTransport(this.configService.get('mail'));
-    this.createTicket('67016312dde4a9a228bbb64d', 'zorinuk@mail.com')
+    //this.createTicket('67016312dde4a9a228bbb64d', 'zorinuk@mail.com')
   }
 
   async create(event: ObjectId, code: number, discount: number, data: string) {
