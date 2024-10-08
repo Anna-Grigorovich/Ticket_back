@@ -5,7 +5,7 @@ import {ConfigService} from "@nestjs/config";
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {cors: true});
   app.useGlobalPipes(new ValidationPipe());
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 3000;
