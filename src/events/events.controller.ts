@@ -25,6 +25,8 @@ import {EUserRoles} from "../auth/user.roles";
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(EUserRoles.ADMIN, EUserRoles.MANAGER)
   @Post()
   create(@Body() createEventDto: CreateEventDto) {
     return this.eventsService.create(createEventDto);
@@ -53,7 +55,7 @@ export class EventsController {
 
   @Get()
   findAll(@Query() params: FindEventDto) {
-    return this.eventsService.findAll(params);
+    return this.eventsService.findAllWithData(params);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

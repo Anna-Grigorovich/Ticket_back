@@ -59,6 +59,61 @@ export class EventsService {
     };
   }
 
+  async findAllWithData(params: FindEventDto) {
+    const { search, dateFrom, dateTo, skip = 0, limit = 10 } = params;
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { title: new RegExp(search, 'i') },
+        { place: new RegExp(search, 'i') },
+        { address: new RegExp(search, 'i') },
+        { description: new RegExp(search, 'i') }
+      ];
+    }
+
+    if (dateFrom || dateTo) {
+      query.date = {};
+      if (dateFrom) {
+        query.date.$gte = dateFrom;
+      }
+      if (dateTo) {
+        query.date.$lte = dateTo;
+      }
+    }
+
+    const events = await this.eventModel.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: 'tickets',
+          localField: '_id',
+          foreignField: 'event',
+          as: 'tickets',
+        },
+      },
+      {
+        $addFields: {
+          sell_count: { $size: '$tickets' },
+        },
+      },
+      {
+        $project: {
+          tickets: 0,
+        },
+      },
+      { $skip: Number(skip) },
+      { $limit: Number(limit) },
+    ]);
+
+    const total = await this.eventModel.countDocuments(query).exec();
+
+    return {
+      total,
+      events,
+    };
+  }
+
   async findOne(id: string) {
     const event = await this.eventModel.findById(new ObjectId(id)).exec()
     if(!event) throw new NotFoundException('Not Found');
