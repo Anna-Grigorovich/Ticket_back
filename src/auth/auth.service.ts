@@ -17,7 +17,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(login.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Wrong password');
     const access = await this.jwtService.signAsync({id: user._id});
-    return access;
+    return {access, role: user.role};
   }
 
   async register(login: LoginDto): Promise<any> {
