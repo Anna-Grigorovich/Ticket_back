@@ -18,8 +18,8 @@ export class TicketsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(EUserRoles.ADMIN, EUserRoles.SELLER, EUserRoles.MANAGER)
-  @Get(':eventId/:code')
-  findOne(@Param('code') code: string, @Param('eventId') eventId: string) {
-    return this.ticketsService.findOne(eventId, +code);
+  @Get(':eventId/:ticketId')
+  findOne(@Param('ticketId') ticketId: string, @Param('eventId') eventId: string) {
+    return this.ticketsService.findOne(eventId, ticketId);
   }
 }

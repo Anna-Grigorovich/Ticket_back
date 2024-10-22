@@ -1,4 +1,4 @@
-import {Injectable, Logger, NotFoundException} from '@nestjs/common';
+import {BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import {InjectModel} from "@nestjs/mongoose";
 import {Model, Types} from "mongoose";
 import {Event, EventDocument} from "../schemas/event.schema";
@@ -33,8 +33,17 @@ export class TicketsService {
     return this.eventModel.findById(new ObjectId(eventId)).populate('tickets').exec()
   }
 
-  findOne(eventId: string, code: number) {
-    return this.ticketModel.findOne({code, event: new ObjectId(eventId)}).exec()
+  async findOne(eventId: string, ticketId: string) {
+    let ticket: TicketDocument;
+    try {
+      ticket = await this.ticketModel.findById(ticketId).exec();
+    }catch (e){}
+    if(!ticket) throw new NotFoundException('Not Found');
+    if(ticket.event.toString() !== eventId) throw new HttpException('Wrong event', HttpStatus.BAD_REQUEST);
+    if(ticket.scanned) throw new HttpException('Already scanned', HttpStatus.CONFLICT);
+    ticket.scanned = true;
+    await ticket.save();
+    return ticket
   }
 
   async createTicket(eventId: string, mail: string) {
