@@ -16,5 +16,5 @@ COPY package*.json ./
 RUN npm install
 COPY --from=build /app/dist ./dist/
 
-EXPOSE 6000
+EXPOSE 3300
 CMD ["node", "dist/main.js"]
