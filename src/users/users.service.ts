@@ -1,84 +1,61 @@
 import {BadRequestException, Injectable, UnauthorizedException} from '@nestjs/common';
-import {User, UserDocument} from "../schemas/user.schema";
-import {Model, Types} from "mongoose";
-import {InjectModel} from "@nestjs/mongoose";
 import {CreateUserDto} from "./dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import {omit} from "lodash";
 import {UpdateUserDto} from "./dto/update-user.dto";
-import ObjectId = Types.ObjectId;
 import {FindUserDto} from "./dto/find-users.dto";
+import {UserRepository} from "../mongo/repositories/user.repository";
+import {UserModel} from "../mongo/models/user.model";
+import {IUsersListDto} from "./dto/usersList.dto";
 
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectModel(User.name) private userModel: Model<UserDocument>
-    ){}
-
-    async getUser(login: string){
-        const user: UserDocument = await this.userModel.findOne({login}).exec();
-        return user;
+        private usersRepo: UserRepository
+    ) {
     }
 
-    async getUserRoleByID(id: string){
-        const user: UserDocument = await this.userModel.findById(id).select('role').exec();
-        return user;
-    }
+    async create(data: CreateUserDto) {
+        const user: UserModel = await this.usersRepo.findOne({login: data.login})
+        if (user) throw new BadRequestException('User already exists');
 
-    async create(login: string, hash: string): Promise<any> {
-        const user = new this.userModel({
-            login: login,
+        const hash = await bcrypt.hash(data.password, 10);
+        const newUser = await this.usersRepo.create({
+            login: data.login,
+            role: data.role,
             password: hash
         });
-        await user.save();
-        return user;
+
+        return omit(newUser, ['password'])
     }
 
-    async createNewUser(data: CreateUserDto){
-        const user = await this.getUser(data.login)
-        if(user) throw new BadRequestException('User already exists');
-        const hash = await bcrypt.hash(data.password, 10);
-        const newUser = await this.create(data.login, hash);
-        const userObject = newUser.toObject();
-        return omit(userObject, ['password'])
-    }
 
-    async updateUser(id: string, data: UpdateUserDto){
-        if(data.password){
+    async updateUser(id: string, data: UpdateUserDto) {
+        if (data.password) {
             const hash = await bcrypt.hash(data.password, 10);
             data.password = hash;
         }
-        return await this.userModel.findByIdAndUpdate(new ObjectId(id), data, {new: true }).exec()
+        return await this.usersRepo.updateById(id, data)
     }
 
     async removeUser(id: string) {
-        return await this.userModel.findByIdAndDelete(new ObjectId(id)).exec()
+        return await this.usersRepo.deleteById(id)
     }
 
-    async getOneUser(id: string){
-        return await this.userModel.findById(new ObjectId(id)).select('-password').exec()
+    async getUser(id: string) {
+        const user: UserModel = await this.usersRepo.findById(id)
+        return omit(user, ['password'])
     }
 
-    async getAllUsers(params: FindUserDto){
-        const { skip = 0, limit = 10, login, role } = params;
-        const query: any = {};
+    async getUsers(params: FindUserDto): Promise<IUsersListDto> {
+        const {skip = 0, limit = 10, login, role} = params;
+        const filter: any = {};
         if (login) {
-            query.login = new RegExp(login, 'i');
+            filter.login = new RegExp(login, 'i');
         }
         if (role) {
-            query.role = role;
+            filter.role = role;
         }
-
-        const users = await this.userModel
-            .find(query)
-            .select('-password')   // Exclude the password field
-            .skip(skip)
-            .limit(limit)
-            .exec();
-        const total = await this.userModel.countDocuments(query).exec();
-        return {
-            total,
-            users,
-        };
+        return await this.usersRepo.getList(filter, skip, limit)
     }
 }

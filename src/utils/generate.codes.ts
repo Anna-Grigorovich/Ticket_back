@@ -1,6 +1,6 @@
 const QRCode = require('qrcode');
 const JsBarcode = require('jsbarcode');
-const { DOMImplementation, XMLSerializer } = require('xmldom');
+const {DOMImplementation, XMLSerializer} = require('xmldom');
 
 export const generateQRCode = async (mongodbId: string) => {
     const qrCodeDataUrl = await QRCode.toDataURL(mongodbId);

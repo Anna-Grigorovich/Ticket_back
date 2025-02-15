@@ -7,6 +7,7 @@ import {MongooseModule} from "@nestjs/mongoose";
 import { EventsModule } from './events/events.module';
 import { TicketsModule } from './tickets/tickets.module';
 import {ServeStaticModule} from "@nestjs/serve-static";
+import { MongoModule } from './mongo/mongo.module';
 import * as path from "path";
 
 @Module({
@@ -14,13 +15,6 @@ import * as path from "path";
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig]
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('mongoConnectURI')
-      }),
-      inject: [ConfigService],
     }),
     ServeStaticModule.forRootAsync({
       imports: [ConfigModule],
@@ -32,6 +26,7 @@ import * as path from "path";
         },
       ],
     }),
+    MongoModule,
     UsersModule,
     AuthModule,
     EventsModule,

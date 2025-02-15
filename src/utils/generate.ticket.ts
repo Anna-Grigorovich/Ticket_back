@@ -1,5 +1,7 @@
-import { generateBarcode, generateQRCode } from './generate.codes';
-import {Event} from "../schemas/event.schema";
+import {generateBarcode, generateQRCode} from './generate.codes';
+import {EventModel} from "../mongo/models/event.model";
+import {TicketModel} from "../mongo/models/ticket.model";
+
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const sharp = require('sharp');
@@ -9,8 +11,8 @@ const svgToPng = async (svgText: string) => {
 };
 
 const getImageDimensions = async (imagePath: string) => {
-    const { width, height } = await sharp(imagePath).metadata();
-    return { width, height };
+    const {width, height} = await sharp(imagePath).metadata();
+    return {width, height};
 };
 
 const formatTimestampToUkrainian = (timestamp: number) => {
@@ -26,16 +28,16 @@ const formatTimestampToUkrainian = (timestamp: number) => {
     return formattedDate;
 };
 
-export const createTicketPdf = async (ticketId: string, eventData: Event, posterPath: string, outputPath: string) => {
-    const doc = new PDFDocument({size: 'A4', margins: { top: 50, left: 50, right: 50, bottom: 0 }});
-    doc.registerFont('Play', './fonts/Play-Regular.ttf');
-    doc.registerFont('PlayBold', './fonts/Play-Bold.ttf');
+export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel, posterPath: string, outputPath: string) => {
+    const doc = new PDFDocument({size: 'A4', margins: {top: 50, left: 50, right: 50, bottom: 0}});
+    doc.registerFont('Play', './resources/fonts/Play-Regular.ttf');
+    doc.registerFont('PlayBold', './resources/fonts/Play-Bold.ttf');
     doc.pipe(fs.createWriteStream(outputPath));
 
     // POSTER IMAGE
     let calculatedHeight = 300
     if (fs.existsSync(posterPath)) {
-        const { width: originalWidth, height: originalHeight } = await getImageDimensions(posterPath);
+        const {width: originalWidth, height: originalHeight} = await getImageDimensions(posterPath);
         const desiredWidth = 200; // Set the width of the image
         const aspectRatio = originalHeight / originalWidth;
         calculatedHeight = desiredWidth * aspectRatio; // Calculate the proportional height
@@ -47,20 +49,23 @@ export const createTicketPdf = async (ticketId: string, eventData: Event, poster
     }
 
     // EVENT BARCODE
-    const barcodeSvg = generateBarcode(ticketId);
+    const barcodeSvg = generateBarcode(ticket._id.toString());
     const barcodePngBuffer = await svgToPng(barcodeSvg);
-    doc.image(barcodePngBuffer, 25, calculatedHeight + 30, { width: 200 });
+    doc.image(barcodePngBuffer, 25, calculatedHeight + 30, {width: 200});
 
     // LEGAL TEXT
     doc.font('PlayBold').fontSize(14).text('ЦЕ ТВІЙ КВИТОК', 25, calculatedHeight + 80);
     doc.fontSize(8).text('РОЗДРУКУЙТЕ АБО ПОКАЖІТЬ ЦЕЙ КВИТОК З ТЕЛЕФОНА', {width: 200, align: 'justify'});
-    doc.font('Play').fontSize(8).text('Унікальний штрих-код може бути використаний лише один раз. Не копіюйте цей квиток і не публікуйте його в інтернеті. Це може стати перешкодою вашого входу на подію. За збереження даних організатор відповідальності не несе.', {width: 200, align: 'justify'});
+    doc.font('Play').fontSize(8).text('Унікальний штрих-код може бути використаний лише один раз. Не копіюйте цей квиток і не публікуйте його в інтернеті. Це може стати перешкодою вашого входу на подію. За збереження даних організатор відповідальності не несе.', {
+        width: 200,
+        align: 'justify'
+    });
 
     // EVENT QR
     doc.moveDown();
-    const qrCodeBase64 = await generateQRCode(ticketId);
+    const qrCodeBase64 = await generateQRCode(ticket._id.toString());
     const qrImageBuffer = Buffer.from(qrCodeBase64, 'base64');
-    doc.image(qrImageBuffer, 50, doc.y, { width: 150, height: 150 });
+    doc.image(qrImageBuffer, 50, doc.y, {width: 150, height: 150});
 
     // EVENT NAME
     doc.font('PlayBold').fontSize(14).text(eventData.title, 250, 22, {width: 350});
@@ -76,10 +81,10 @@ export const createTicketPdf = async (ticketId: string, eventData: Event, poster
     doc.font('PlayBold').fontSize(14).text(formattedDate.toUpperCase());
     doc.moveDown();
     // EVENT PRICE
-    doc.font('PlayBold').fontSize(14).text(`ЦІНА: ${eventData.price} ГРН`);
+    doc.font('PlayBold').fontSize(14).text(`ЦІНА: ${ticket.price} ГРН`);
 
     // FOOTER
-    doc.image('./footer.jpg', 0, 755, {width: 595});
+    doc.image('./resources/footer.jpg', 0, 755, {width: 595});
     doc.font('Play').fontSize(10).fillColor('white').text('tel: 063 603 7569', 25, 780);
     doc.font('Play').fontSize(10).text('mail: kievkills@gmail.com');
     doc.font('Play').fontSize(10).text('вул. Михайла Омеляновича-Павленка 4/6, Kyiv, Ukraine');

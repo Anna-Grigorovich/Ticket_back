@@ -1,4 +1,4 @@
-export const  appConfig = () => ({
+export const appConfig = () => ({
     port: Number(process.env.PORT),
     mongoConnectURI: process.env.MONGODB_URI,
     imagesPath: process.env.IMAGES_PATH,
@@ -11,7 +11,7 @@ export const  appConfig = () => ({
             noTimestamp: true
         }
     },
-    mail:{
+    mail: {
         service: 'gmail',
         auth: {
             user: process.env.MAIL_USER,
