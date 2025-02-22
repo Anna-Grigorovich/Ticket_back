@@ -55,7 +55,7 @@ export class TicketRepository {
         return TicketModel.fromDoc(ticket)
     }
 
-    async updateById(id: string, updateData: Partial<UpdateTicketDto>): Promise<TicketModel | null> {
+    async updateById(id: string, updateData: Partial<TicketModel>): Promise<TicketModel | null> {
         const updated = await this.model.findByIdAndUpdate(id, updateData, {new: true}).exec();
         return TicketModel.fromDoc(updated);
     }

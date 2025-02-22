@@ -8,6 +8,8 @@ import {ConfigService} from "@nestjs/config";
 import {FindEventDto} from "./dto/find-event.dto";
 import {EventRepository} from "../mongo/repositories/event.repository";
 import {IEventListDto} from "./dto/eventsList.dto";
+import {EventPriceModel} from "../mongo/models/event-price.model";
+import {EventModel} from "../mongo/models/event.model";
 
 @Injectable()
 export class EventsService {
@@ -52,12 +54,31 @@ export class EventsService {
         return event
     }
 
+    async validatePrice(id: string, price: number): Promise<void> {
+        const event = EventModel.fromDoc(await this.eventsRepository.getById(id))
+        if (!event) throw new NotFoundException('Not Found');
+        const priceModel = event.prices.find(p => p.price === price);
+        if (!priceModel) throw new NotFoundException('Not Found');
+    }
+
     async update(id: string, updateEventDto: UpdateEventDto) {
         return await this.eventsRepository.updateById(id, updateEventDto)
     }
 
     async remove(id: string) {
+        await this.removeFileById(id)
         return await this.eventsRepository.deleteById(id);
+    }
+
+    async removeFileById(id: string): Promise<void> {
+        try {
+            const filePath = path.join(process.cwd(), this.configService.get('imagesPath'), `${id}.jpg`);
+            if (fs.existsSync(filePath)) {
+                await fs.promises.unlink(filePath);
+            }
+        } catch (error) {
+            throw new Error(`Failed to remove file with id ${id}: ${error.message}`);
+        }
     }
 
     async uploadFile(id: string, file: Express.Multer.File) {

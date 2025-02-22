@@ -18,9 +18,7 @@ export class TicketsService {
         private eventsRepository: EventRepository,
         private ticketsRepository: TicketRepository,
         private mailService: EmailService
-    ) {
-        // this.createTicket('67b07fe2aab9bdfdbf5a3573', 'zorinuk@gmail.com', 100)
-    }
+    ) { }
 
     findAll(eventId: string) {
         return this.eventsRepository.getByIdWithTickets(eventId);
@@ -40,13 +38,23 @@ export class TicketsService {
         return ticket
     }
 
-    async createTicket(eventId: string, mail: string, price: number, code?: string, discount?: number, data?: string) {
+    async newTicket(eventId: string, mail: string, price: number, code?: string, discount?: number, data?: string){
         const event = await this.eventsRepository.getById(eventId)
-        const eventModel = EventModel.fromDoc(event);
         if (!event) throw new NotFoundException('Event Not Found, Can`t create ticket');
-        const ticket = await this.ticketsRepository.create({event, price, mail, code, discount, data})
-        const ticketPath = await this.generateTicketPdf(ticket, EventModel.fromDoc(event));
-        await this.mailService.sendMail('topTickets', mail, eventModel.title, ticketPath);
+        return await this.ticketsRepository.create({event, price, mail, code, discount, data})
+    }
+
+    async ticketPayed(ticketId: string, payment: object){
+        const ticket = await this.ticketsRepository.getById(ticketId);
+        if(!ticket) {
+            console.log(`payment for ticketId: ${ticketId} not found ticket`);
+            return
+        }
+        ticket.payment = payment;
+        ticket.payed = true;
+        await this.ticketsRepository.updateById(ticketId, ticket)
+        const ticketPath = await this.generateTicketPdf(ticket, ticket.event);
+        await this.mailService.sendMail('topTickets', ticket.mail, ticket.event.title, ticketPath);
         fs.unlink(ticketPath, () => {
         });
     }

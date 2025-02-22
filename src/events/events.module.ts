@@ -12,7 +12,8 @@ import {MongoModule} from "../mongo/mongo.module";
         UsersModule
     ],
     controllers: [EventsController],
-    providers: [EventsService]
+    providers: [EventsService],
+    exports: [EventsService]
 })
 export class EventsModule {
 }

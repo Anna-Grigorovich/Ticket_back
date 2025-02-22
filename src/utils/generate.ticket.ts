@@ -1,6 +1,8 @@
 import {generateBarcode, generateQRCode} from './generate.codes';
 import {EventModel} from "../mongo/models/event.model";
 import {TicketModel} from "../mongo/models/ticket.model";
+import {EventPrice} from "../mongo/schemas/event.price";
+import {EventPriceModel} from "../mongo/models/event-price.model";
 
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
@@ -29,6 +31,7 @@ const formatTimestampToUkrainian = (timestamp: number) => {
 };
 
 export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel, posterPath: string, outputPath: string) => {
+    const priceModel: EventPriceModel = eventData.prices.find(p=> p.price === ticket.price)
     const doc = new PDFDocument({size: 'A4', margins: {top: 50, left: 50, right: 50, bottom: 0}});
     doc.registerFont('Play', './resources/fonts/Play-Regular.ttf');
     doc.registerFont('PlayBold', './resources/fonts/Play-Bold.ttf');
@@ -82,7 +85,12 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     doc.moveDown();
     // EVENT PRICE
     doc.font('PlayBold').fontSize(14).text(`ЦІНА: ${ticket.price} ГРН`);
-
+    if(priceModel.description){
+        doc.font('PlayBold').fontSize(14).text(priceModel.description);
+    }
+    if(priceModel.place){
+        doc.font('PlayBold').fontSize(14).text(`МІСЦЕ: ${priceModel.place}`);
+    }
     // FOOTER
     doc.image('./resources/footer.jpg', 0, 755, {width: 595});
     doc.font('Play').fontSize(10).fillColor('white').text('tel: 063 603 7569', 25, 780);

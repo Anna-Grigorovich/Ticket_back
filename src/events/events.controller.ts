@@ -8,7 +8,7 @@ import {
     Delete,
     UploadedFile,
     UseInterceptors,
-    ParseFilePipe, FileTypeValidator, Query, UseGuards
+    ParseFilePipe, FileTypeValidator, Query, UseGuards, NotFoundException
 } from '@nestjs/common';
 import {EventsService} from './events.service';
 import {CreateEventDto} from './dto/create-event.dto';

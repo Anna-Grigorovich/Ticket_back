@@ -21,6 +21,10 @@ export class Ticket {
     scanned: boolean;
     @Prop()
     mail: string;
+    @Prop({type: Boolean, default: false})
+    payed: boolean;
+    @Prop({type: Object})
+    payment: object;
 }
 
 export const TicketSchema = SchemaFactory.createForClass(Ticket);

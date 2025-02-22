@@ -1,4 +1,15 @@
-import {IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString} from "class-validator";
+import {
+    ArrayMinSize,
+    IsBoolean,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    MinLength,
+    ValidateNested
+} from "class-validator";
+import {EventPriceDto} from "./event-price.dto";
+import {Type} from "class-transformer";
 
 export class CreateEventDto {
     @IsNotEmpty()
@@ -11,8 +22,10 @@ export class CreateEventDto {
     description: string;
     @IsNumber()
     date: number;
-    @IsNumber()
-    price: string;
+    @ValidateNested({ each: true })
+    @ArrayMinSize(1)
+    @Type(() => EventPriceDto)
+    prices: EventPriceDto[];
     @IsOptional()
     @IsString()
     image: string;

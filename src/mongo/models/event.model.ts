@@ -2,6 +2,7 @@ import {Types} from "mongoose";
 import ObjectId = Types.ObjectId;
 import {EventDocument} from "../schemas/event.schema";
 import {TicketModel} from "./ticket.model";
+import {EventPriceModel} from "./event-price.model";
 
 export class EventModel {
     _id: ObjectId;
@@ -11,7 +12,7 @@ export class EventModel {
     description: string;
     date: number;
     ended: boolean;
-    price: number;
+    prices: EventPriceModel[];
     image: string;
     show: boolean;
     tickets?: TicketModel[]
@@ -30,7 +31,7 @@ export class EventModel {
             description: doc.description,
             date: doc.date,
             ended: doc.ended,
-            price: doc.price,
+            prices: doc.prices?.map(p=>EventPriceModel.fromDoc(p)),
             image: doc.image,
             show: doc.show,
             tickets: doc.tickets?.map(t => TicketModel.fromDoc(t))

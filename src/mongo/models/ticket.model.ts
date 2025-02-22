@@ -12,6 +12,8 @@ export class TicketModel {
     scanned: boolean;
     mail: string;
     price: number;
+    payed: boolean;
+    payment: object;
 
     constructor(init?: Partial<TicketModel>) {
         Object.assign(this, init);
@@ -27,7 +29,9 @@ export class TicketModel {
             data: doc.data,
             scanned: doc.scanned,
             mail: doc.mail,
-            price: doc.price
+            price: doc.price,
+            payed: doc.payed,
+            payment: doc.payment
         })
     }
 }

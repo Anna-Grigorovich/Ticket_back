@@ -8,6 +8,7 @@ import { EventsModule } from './events/events.module';
 import { TicketsModule } from './tickets/tickets.module';
 import {ServeStaticModule} from "@nestjs/serve-static";
 import { MongoModule } from './mongo/mongo.module';
+import { PaymentModule } from './payment/payment.module';
 import * as path from "path";
 
 @Module({
@@ -30,7 +31,8 @@ import * as path from "path";
     UsersModule,
     AuthModule,
     EventsModule,
-    TicketsModule
+    TicketsModule,
+    PaymentModule
   ],
   controllers: [],
   providers: [],
