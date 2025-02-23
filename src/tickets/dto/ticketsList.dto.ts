@@ -1,6 +1,7 @@
 import {TicketModel} from "../../mongo/models/ticket.model";
+import {TicketResponseDto} from "./ticket-response.dto";
 
-export interface ITicketsListDto {
-    tickets: TicketModel[]
+export class TicketsListDto {
+    tickets: TicketResponseDto[]
     total: number
 }

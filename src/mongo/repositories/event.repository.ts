@@ -4,8 +4,8 @@ import {Model} from "mongoose";
 import {Event, EventDocument} from "../schemas/event.schema";
 import {CreateEventDto} from "../../events/dto/create-event.dto";
 import {EventModel} from "../models/event.model";
-import {IEventListDto} from "../../events/dto/eventsList.dto";
 import {UpdateEventDto} from "../../events/dto/update-event.dto";
+import {EventListModel} from "../models/event-list.model";
 
 @Injectable()
 export class EventRepository {
@@ -17,7 +17,7 @@ export class EventRepository {
         return EventModel.fromDoc(newEvent);
     }
 
-    async getList(filter: Partial<Event> = {}, skip: number, limit: number): Promise<IEventListDto> {
+    async getList(filter: Partial<Event> = {}, skip: number, limit: number): Promise<EventListModel> {
         const events: EventDocument[] = await this.model.aggregate([
             {$match: filter},
             {

@@ -1,8 +1,11 @@
-import {Controller, Post, Req, HttpException, HttpStatus} from '@nestjs/common';
+import {Controller, Post, Req, HttpStatus, HttpCode, HttpException} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import {TicketsService} from "../tickets/tickets.service";
+import {ApiExcludeController, ApiOperation, ApiTags} from "@nestjs/swagger";
 
 @Controller('payment')
+@ApiTags('payment')
+@ApiExcludeController()
 export class PaymentController {
   constructor(
       private readonly paymentService: PaymentService,
@@ -10,6 +13,8 @@ export class PaymentController {
   ) {}
 
   @Post('callback')
+  @ApiOperation({ summary: 'Handle payment provider callback for ticket payments' })
+  @HttpCode(200)
   async callback(@Req() req: Request) {
     // @ts-ignore
     const { data, signature } = req.body;

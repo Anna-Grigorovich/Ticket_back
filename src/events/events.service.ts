@@ -7,8 +7,7 @@ import * as fs from 'fs';
 import {ConfigService} from "@nestjs/config";
 import {FindEventDto} from "./dto/find-event.dto";
 import {EventRepository} from "../mongo/repositories/event.repository";
-import {IEventListDto} from "./dto/eventsList.dto";
-import {EventPriceModel} from "../mongo/models/event-price.model";
+import {EventListDto} from "./dto/eventsList.dto";
 import {EventModel} from "../mongo/models/event.model";
 
 @Injectable()
@@ -23,7 +22,7 @@ export class EventsService {
         return await this.eventsRepository.create(createEventDto);
     }
 
-    async getList(params: FindEventDto): Promise<IEventListDto> {
+    async getList(params: FindEventDto): Promise<EventListDto> {
         const {search, dateFrom, dateTo, skip = 0, limit = 10} = params;
         const filter: any = {};
 
@@ -45,7 +44,7 @@ export class EventsService {
                 filter.date.$lte = dateTo;
             }
         }
-        return await this.eventsRepository.getList(filter, skip, limit)
+        return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit))
     }
 
     async findOne(id: string) {

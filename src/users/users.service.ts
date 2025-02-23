@@ -6,7 +6,7 @@ import {UpdateUserDto} from "./dto/update-user.dto";
 import {FindUserDto} from "./dto/find-users.dto";
 import {UserRepository} from "../mongo/repositories/user.repository";
 import {UserModel} from "../mongo/models/user.model";
-import {IUsersListDto} from "./dto/usersList.dto";
+import {UserListModel} from "../mongo/models/user-list.model";
 
 @Injectable()
 export class UsersService {
@@ -15,7 +15,7 @@ export class UsersService {
     ) {
     }
 
-    async create(data: CreateUserDto) {
+    async create(data: CreateUserDto): Promise<UserModel> {
         const user: UserModel = await this.usersRepo.findOne({login: data.login})
         if (user) throw new BadRequestException('User already exists');
 
@@ -29,8 +29,7 @@ export class UsersService {
         return omit(newUser, ['password'])
     }
 
-
-    async updateUser(id: string, data: UpdateUserDto) {
+    async updateUser(id: string, data: UpdateUserDto): Promise<UserModel> {
         if (data.password) {
             const hash = await bcrypt.hash(data.password, 10);
             data.password = hash;
@@ -42,12 +41,12 @@ export class UsersService {
         return await this.usersRepo.deleteById(id)
     }
 
-    async getUser(id: string) {
+    async getUser(id: string): Promise<UserModel> {
         const user: UserModel = await this.usersRepo.findById(id)
         return omit(user, ['password'])
     }
 
-    async getUsers(params: FindUserDto): Promise<IUsersListDto> {
+    async getUsers(params: FindUserDto): Promise<UserListModel> {
         const {skip = 0, limit = 10, login, role} = params;
         const filter: any = {};
         if (login) {

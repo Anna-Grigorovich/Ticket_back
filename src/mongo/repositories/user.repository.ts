@@ -3,7 +3,7 @@ import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {User, UserDocument} from "../schemas/user.schema";
 import {UserModel} from "../models/user.model";
-import {IUsersListDto} from "../../users/dto/usersList.dto";
+import {UserListModel} from "../models/user-list.model";
 
 @Injectable()
 export class UserRepository {
@@ -25,7 +25,7 @@ export class UserRepository {
         return UserModel.fromDoc(user)
     }
 
-    async getList(filter: Partial<User> = {}, skip: number, limit: number): Promise<IUsersListDto> {
+    async getList(filter: Partial<User> = {}, skip: number, limit: number): Promise<UserListModel> {
         const users = await this.model
             .find(filter)
             .select('-password')

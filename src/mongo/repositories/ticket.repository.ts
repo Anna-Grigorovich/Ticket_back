@@ -4,8 +4,7 @@ import {Model} from "mongoose";
 import {Ticket, TicketDocument} from "../schemas/ticket.schema";
 import {CreateTicketDto} from "../../tickets/dto/create-ticket.dto";
 import {TicketModel} from "../models/ticket.model";
-import {UpdateTicketDto} from "../../tickets/dto/update-ticket.dto";
-import {ITicketsListDto} from "../../tickets/dto/ticketsList.dto";
+import {TicketsListModel} from "../models/tickets-list.model";
 
 @Injectable()
 export class TicketRepository {
@@ -17,7 +16,7 @@ export class TicketRepository {
         return TicketModel.fromDoc(newTicket);
     }
 
-    async getList(filter: Partial<Ticket> = {}, skip: number, limit: number): Promise<ITicketsListDto> {
+    async getList(filter: Partial<Ticket> = {}, skip: number, limit: number): Promise<TicketsListModel> {
         const tickets: TicketDocument[] = await this.model.aggregate([
             {$match: filter},
             {

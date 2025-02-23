@@ -20,10 +20,6 @@ export class TicketsService {
         private mailService: EmailService
     ) { }
 
-    findAll(eventId: string) {
-        return this.eventsRepository.getByIdWithTickets(eventId);
-    }
-
     async findOne(id: string) {
         const ticket = await this.ticketsRepository.getById(id)
         if (!ticket) throw new NotFoundException('Not Found');
@@ -34,6 +30,7 @@ export class TicketsService {
         const ticket = await this.ticketsRepository.getById(id)
         if (!ticket) throw new NotFoundException('Not Found');
         if (ticket.scanned) throw new HttpException('Already scanned', HttpStatus.CONFLICT);
+        if (!ticket.payed) throw new HttpException('Ticket not payed', HttpStatus.CONFLICT);
         await this.ticketsRepository.updateById(id, {scanned: true})
         return ticket
     }
