@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import {ConfigModule, ConfigService} from "@nestjs/config";
@@ -10,6 +10,9 @@ import {ServeStaticModule} from "@nestjs/serve-static";
 import { MongoModule } from './mongo/mongo.module';
 import { PaymentModule } from './payment/payment.module';
 import * as path from "path";
+import {AppLoggerMiddleware} from "./middlewares/app.logger.middleware";
+import {ExceptionsFilter} from "./filters/exceptions.filter";
+import {APP_FILTER} from "@nestjs/core";
 
 @Module({
   imports: [
@@ -35,6 +38,13 @@ import * as path from "path";
     PaymentModule
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {provide: APP_FILTER, useClass: ExceptionsFilter}
+  ],
 })
-export class AppModule {}
+
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
+}
