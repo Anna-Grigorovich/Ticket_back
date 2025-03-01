@@ -50,7 +50,6 @@ export class EventsController {
 
     @Get()
     @ApiOperation({ summary: 'Retrieve a list of all events with optional filters' })
-    @ApiQuery({ type: FindEventDto })
     @ApiResponse({ type: EventListDto })
     async findList(@Query() params: FindEventDto):Promise<EventListDto> {
         return  await this.eventsService.getList(params)

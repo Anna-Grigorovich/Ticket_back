@@ -1,7 +1,8 @@
 import {Controller, Post, Req, HttpStatus, HttpCode, HttpException, Logger} from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import {TicketsService} from "../tickets/tickets.service";
 import {ApiExcludeController, ApiOperation, ApiTags} from "@nestjs/swagger";
+import {OrderService} from "../order/order.service";
+import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
 
 @Controller('payment')
 @ApiTags('payment')
@@ -11,7 +12,7 @@ export class PaymentController {
 
   constructor(
       private readonly paymentService: PaymentService,
-      private readonly ticketsService: TicketsService
+      private readonly orderService: OrderService,
   ) {}
 
   @Post('callback')
@@ -25,12 +26,13 @@ export class PaymentController {
       throw new HttpException('Invalid Signature', HttpStatus.FORBIDDEN);
     }
     const decodedData = JSON.parse(Buffer.from(data, 'base64').toString('utf-8'));
-    this.logger.log(decodedData)
-    if(decodedData.status === 'success') {
+    const liqPayModel = LiqPayCallbackModel.fromLiqPayCallback(decodedData);
+    this.logger.log(JSON.stringify(decodedData))
+    if(liqPayModel.status === 'success') {
       try {
-        await this.ticketsService.ticketPayed(decodedData.order_id, decodedData)
+        await this.orderService.orderPayed(liqPayModel)
       }catch (e) {
-        this.logger.error(decodedData)
+        this.logger.error(liqPayModel)
       }
     }
     return true

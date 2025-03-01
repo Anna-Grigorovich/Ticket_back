@@ -1,7 +1,7 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {HydratedDocument} from 'mongoose';
 import {TicketDocument} from "./ticket.schema";
-import {EventPrice, EventPriceDocument, EventPriceSchema} from "./event.price";
+import {EventPriceDocument, EventPriceSchema} from "./event.price";
 
 @Schema({timestamps: true, toJSON: {virtuals: true}})
 export class Event {

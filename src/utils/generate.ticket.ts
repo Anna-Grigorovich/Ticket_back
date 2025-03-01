@@ -85,6 +85,8 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     doc.moveDown();
     // EVENT PRICE
     doc.font('PlayBold').fontSize(14).text(`ЦІНА: ${ticket.price} ГРН`);
+    // FEE
+    doc.font('PlayBold').fontSize(14).text(`ЗБІР: ${ticket.serviceFee} ГРН`);
     if(priceModel.description){
         doc.font('PlayBold').fontSize(14).text(priceModel.description);
     }

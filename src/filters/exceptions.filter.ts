@@ -19,12 +19,11 @@ export class ExceptionsFilter implements ExceptionFilter{
 
         let status: HttpStatus;
         let errorMessage: string;
-
         if(exception instanceof HttpException){
             status = exception.getStatus();
             const errorResponse = exception.getResponse();
             //@ts-ignore
-            errorMessage = exception.message || errorResponse.error;
+            errorMessage = errorResponse.message || exception.message;
         }else{
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             errorMessage = 'INTERNAL_SERVER_ERROR';

@@ -2,8 +2,8 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import {TicketModel} from "../mongo/models/ticket.model";
-import * as moment from "moment";
+import {OrderModel} from "../mongo/models/order.model";
+import {PaymentData} from "./interfaces/payment-data.interface";
 
 @Injectable()
 export class PaymentService implements OnModuleInit {
@@ -89,8 +89,7 @@ export class PaymentService implements OnModuleInit {
     `;
     }
 
-    generatePaymentObject(params: Record<string, any>): { data: string; signature: string } {
-        params.language = 'uk';
+    generatePaymentObject(params: Record<string, any>): PaymentData {
         params = this.validateParams(params);
         const data = Buffer.from(JSON.stringify(params)).toString('base64');
         const signature = this.strToSign(this.privateKey + data + this.privateKey);
@@ -102,19 +101,34 @@ export class PaymentService implements OnModuleInit {
         return expectedSignature === signature;
     }
 
-    getTicketPaymentForm(ticket: TicketModel){
+    getPaymentForm(order: OrderModel){
         return this.generatePaymentForm({
             action: 'pay',
-            amount: ticket.price,
+            amount: (order.price + order.serviceFee) * order.quantity,
             currency: 'UAH',
-            description: ticket.event.title,
-            order_id: ticket._id,
+            description: order.event.title,
+            order_id: order._id,
             version: 3,
             server_url: `${this.configService.get('SERVER_URL')}/payment/callback`,
             result_url: `${this.configService.get('RESULT_URL')}/success`,
-            expired_date: moment.utc().add(30, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
             rro_info: {
-                delivery_emails: [ticket.mail]
+                delivery_emails: [order.mail]
+            }
+        });
+    }
+
+    getPaymentData(order: OrderModel): PaymentData{
+        return this.generatePaymentObject({
+            action: 'pay',
+            amount: (order.price + order.serviceFee) * order.quantity,
+            currency: 'UAH',
+            description: order.event.title,
+            order_id: order._id,
+            version: 3,
+            server_url: `${this.configService.get('SERVER_URL')}/payment/callback`,
+            result_url: `${this.configService.get('RESULT_URL')}/success`,
+            rro_info: {
+                delivery_emails: [order.mail]
             }
         });
     }

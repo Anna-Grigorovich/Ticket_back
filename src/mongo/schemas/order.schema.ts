@@ -4,28 +4,24 @@ import mongoose from "mongoose";
 import {EventDocument} from "./event.schema";
 import {PaymentDataDocument, PaymentDataSchema} from "./payment.data";
 
-export type TicketDocument = HydratedDocument<Ticket>;
+export type OrderDocument = HydratedDocument<Order>;
 
 @Schema({timestamps: true})
-export class Ticket {
+export class Order {
     @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Event'})
     event: EventDocument;
-    @Prop()
-    code: string;
     @Prop()
     price: number;
     @Prop()
     serviceFee: number;
     @Prop()
-    discount: number;
-    @Prop()
-    data: string;
-    @Prop({default: false})
-    scanned: boolean;
+    quantity: number;
     @Prop()
     mail: string;
+    @Prop({type: Boolean, default: false})
+    payed: boolean;
     @Prop({ type: PaymentDataSchema })
     payment: PaymentDataDocument;
 }
 
-export const TicketSchema = SchemaFactory.createForClass(Ticket);
+export const OrderSchema = SchemaFactory.createForClass(Order);

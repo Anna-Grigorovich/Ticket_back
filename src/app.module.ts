@@ -13,6 +13,7 @@ import * as path from "path";
 import {AppLoggerMiddleware} from "./middlewares/app.logger.middleware";
 import {ExceptionsFilter} from "./filters/exceptions.filter";
 import {APP_FILTER} from "@nestjs/core";
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import {APP_FILTER} from "@nestjs/core";
     AuthModule,
     EventsModule,
     TicketsModule,
-    PaymentModule
+    PaymentModule,
+    OrderModule
   ],
   controllers: [],
   providers: [

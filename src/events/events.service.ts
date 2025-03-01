@@ -53,11 +53,12 @@ export class EventsService {
         return event
     }
 
-    async validatePrice(id: string, price: number): Promise<void> {
+    async validatePrice(id: string, price: number): Promise<EventModel> {
         const event = EventModel.fromDoc(await this.eventsRepository.getById(id))
         if (!event) throw new NotFoundException('Not Found');
         const priceModel = event.prices.find(p => p.price === price);
-        if (!priceModel) throw new NotFoundException('Not Found');
+        if (!priceModel) throw new NotFoundException('Price Not Found');
+        return event;
     }
 
     async update(id: string, updateEventDto: UpdateEventDto) {

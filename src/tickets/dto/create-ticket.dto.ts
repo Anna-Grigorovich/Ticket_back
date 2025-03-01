@@ -1,10 +1,10 @@
 import {EventDocument} from "../../mongo/schemas/event.schema";
+import {LiqPayCallbackModel} from "../../mongo/models/payment-result.model";
 
 export class CreateTicketDto {
     event: EventDocument;
-    code?: string;
     price: number;
-    discount?: number;
-    data?: string;
-    mail?: string;
+    serviceFee: number;
+    mail: string;
+    payment: LiqPayCallbackModel;
 }

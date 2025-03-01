@@ -21,9 +21,6 @@ export class TicketResponseDto {
     @ApiProperty({ description: 'Email address of the ticket owner', example: 'example@mail.com' })
     mail: string;
 
-    @ApiProperty({ description: 'Payment status of the ticket', example: true })
-    payed: boolean;
-
     public static fromModel(model: TicketModel): TicketResponseDto {
         return {
             event: EventResponseDto.fromModel(model.event),
@@ -32,7 +29,6 @@ export class TicketResponseDto {
             discount: model.discount,
             data: model.data,
             mail: model.mail,
-            payed: model.payed
         }
     }
 }

@@ -59,7 +59,6 @@ export class UsersController {
     @Get()
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Retrieve a list of users with optional filters (Admin only)' })
-    @ApiQuery({ type: FindUserDto })
     @ApiResponse({  type: UsersListResponseDto })
     async findAll(@Query() params: FindUserDto): Promise<UsersListResponseDto> {
         return UsersListResponseDto.fromModel(await this.usersService.getUsers(params));
