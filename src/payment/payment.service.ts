@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as crypto from 'crypto';
 import {OrderModel} from "../mongo/models/order.model";
 import {PaymentData} from "./interfaces/payment-data.interface";
+import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
 
 @Injectable()
 export class PaymentService implements OnModuleInit {
@@ -99,6 +100,11 @@ export class PaymentService implements OnModuleInit {
     verifyCallback(data: string, signature: string): boolean {
         const expectedSignature = this.strToSign(this.privateKey + data + this.privateKey);
         return expectedSignature === signature;
+    }
+
+    decodeData(data: string): LiqPayCallbackModel{
+        const decodedData = JSON.parse(Buffer.from(data, 'base64').toString('utf-8'));
+        return LiqPayCallbackModel.fromLiqPayCallback(decodedData);
     }
 
     getPaymentForm(order: OrderModel){

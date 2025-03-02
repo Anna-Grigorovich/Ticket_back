@@ -55,6 +55,7 @@ export class OrderService {
                 callbackModel,
             )
         }
-        await this.orderRepository.delete(callbackModel.orderId)
+        // await this.orderRepository.delete(callbackModel.orderId)
+        //TODO remove orders on event ends
     }
 }
