@@ -14,6 +14,8 @@ RUN npm run build
 FROM node:lts-alpine
 
 WORKDIR /app
+LABEL com.centurylinklabs.watchtower.enable="true"
+
 COPY package*.json ./
 RUN npm install
 
