@@ -15,6 +15,8 @@ export class CreateEventResponseDto {
     description: string;
     @ApiProperty()
     date: number;
+    @ApiProperty()
+    dateEnd: number;
     @ApiProperty({type: EventPriceDto, isArray: true})
     prices: EventPriceDto[];
     @ApiProperty()
@@ -23,6 +25,8 @@ export class CreateEventResponseDto {
     show: boolean
     @ApiProperty()
     ended: boolean
+    @ApiProperty()
+    sellEnded: boolean;
 
     constructor(init?: Partial<CreateEventResponseDto>) {
         Object.assign(this, init)

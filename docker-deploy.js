@@ -1,18 +1,7 @@
 const { spawn } = require('child_process');
 
-const imageName = `grigorovich826/ticketsback`;
-const dockerfilePath = `../Dockerfile`;
-
-const dockerUsername = process.env.DOCKER_USERNAME;
-const dockerPassword = process.env.DOCKER_PASSWORD;
-
-if (!dockerUsername || !dockerPassword) {
-    console.error('Error: Docker username or password not set in environment variables.');
-    process.exit(1);
-}
-
-// Docker login command
-const loginCommand = `echo ${dockerPassword} | docker login -u ${dockerUsername} --password-stdin`;
+const imageName = `zorinalex/ticketsback`;
+const dockerfilePath = `./Dockerfile`;
 
 // Docker build and push commands
 const buildCommand = `docker build -t ${imageName} -f ${dockerfilePath} .`;
@@ -45,9 +34,6 @@ const runCommand = (command, commandName) => {
 // Execute the commands sequentially
 (async () => {
     try {
-        console.log('Logging into Docker...');
-        await runCommand(loginCommand, 'Docker login');
-
         console.log('Building Docker image...');
         await runCommand(buildCommand, 'Docker build');
 
