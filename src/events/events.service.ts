@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import {CreateEventDto} from './dto/create-event.dto';
 import {UpdateEventDto} from './dto/update-event.dto';
 import {Jimp} from "jimp";
@@ -9,13 +9,21 @@ import {FindEventDto} from "./dto/find-event.dto";
 import {EventRepository} from "../mongo/repositories/event.repository";
 import {EventListDto} from "./dto/eventsList.dto";
 import {EventModel} from "../mongo/models/event.model";
+import {SettingsService} from "../services/settings.service";
+import {SettingsModel} from "../mongo/models/settings.model";
 
 @Injectable()
 export class EventsService {
     constructor(
         private configService: ConfigService,
-        private eventsRepository: EventRepository
+        private eventsRepository: EventRepository,
+        private settingsService: SettingsService,
     ) {
+    }
+
+    validateDates(createEventDto: CreateEventDto){
+        if(createEventDto.dateEnd < createEventDto.date) throw new BadRequestException('Invalid end date');
+        if(createEventDto.dateEnd < Date.now()) throw new BadRequestException('Invalid end date');
     }
 
     async create(createEventDto: CreateEventDto) {
@@ -25,7 +33,7 @@ export class EventsService {
     async getList(params: FindEventDto): Promise<EventListDto> {
         const {search, dateFrom, dateTo, skip = 0, limit = 10} = params;
         const filter: any = {};
-
+        const settings: SettingsModel = this.settingsService.getSettings();
         if (search) {
             filter.$or = [
                 {title: new RegExp(search, 'i')},
@@ -44,7 +52,7 @@ export class EventsService {
                 filter.date.$lte = dateTo;
             }
         }
-        return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit))
+        return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit), settings.serviceFee)
     }
 
     async findOne(id: string) {
@@ -103,5 +111,9 @@ export class EventsService {
         } catch (error) {
             throw new Error('Failed to process the image');
         }
+    }
+
+    async closeEvent(event: EventModel){
+        //TODO close event and make a report
     }
 }

@@ -2,6 +2,7 @@ import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {HydratedDocument} from 'mongoose';
 import {TicketDocument} from "./ticket.schema";
 import {EventPriceDocument, EventPriceSchema} from "./event.price";
+import {EventReportDocument, EventReportSchema} from "./event-report.data";
 
 @Schema({timestamps: true, toJSON: {virtuals: true}})
 export class Event {
@@ -15,14 +16,20 @@ export class Event {
     description: string;
     @Prop()
     date: number;
+    @Prop()
+    dateEnd: number;
     @Prop({type: Boolean, default: false})
     ended: boolean;
+    @Prop({type: Boolean, default: false})
+    sellEnded: boolean;
     @Prop({ type: [EventPriceSchema] })
     prices: EventPriceDocument[];
     @Prop()
     image: string;
     @Prop({type: Boolean, default: true})
     show: boolean;
+    @Prop({ type: EventReportSchema, default: null })
+    report: EventReportDocument
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);

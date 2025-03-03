@@ -10,6 +10,7 @@ import {TicketModel} from "../mongo/models/ticket.model";
 import {EventModel} from "../mongo/models/event.model";
 import {EmailService} from "../services/mail.service";
 import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
+import {IAttachment} from "../services/mail.interfaces";
 
 @Injectable()
 export class TicketsService {
@@ -35,13 +36,22 @@ export class TicketsService {
         return ticket
     }
 
-    async createTicket(eventId: string, mail: string, price: number, serviceFee: number, payment: LiqPayCallbackModel) {
+    async createTickets(eventId: string, mail: string, price: number, serviceFee: number, payment: LiqPayCallbackModel, quantity: number) {
         const event = await this.eventsRepository.getById(eventId)
         if (!event) throw new NotFoundException('Event Not Found, Can`t create ticket');
-        const ticket= await this.ticketsRepository.create({event, price, serviceFee, mail, payment})
-        const ticketPath = await this.generateTicketPdf(ticket, ticket.event);
-        await this.mailService.sendMail('topTickets', ticket.mail, ticket.event.title, ticketPath);
-        fs.unlink(ticketPath, () => {})
+        const attachments: IAttachment[] = [];
+        for (let i=0; i < quantity; i++) {
+            const ticket= await this.ticketsRepository.create({event, price, serviceFee, mail, payment})
+            const ticketPath = await this.generateTicketPdf(ticket, ticket.event);
+            attachments.push({
+                path: ticketPath,
+                filename: `ticket_${i}`
+            })
+        }
+        await this.mailService.sendMail('topTickets', mail, event.title, attachments);
+        attachments.forEach(attachment => {
+            fs.unlink(attachment.path, () => {})
+        })
     }
 
     protected async generateTicketPdf(ticket: TicketModel, event: EventModel): Promise<string> {

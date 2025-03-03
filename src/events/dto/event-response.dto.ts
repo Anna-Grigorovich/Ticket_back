@@ -1,7 +1,7 @@
-import {EventPriceDto} from "./event-price.dto";
 import {ApiProperty} from "@nestjs/swagger";
 import {EventDocument} from "../../mongo/schemas/event.schema";
 import {EventModel} from "../../mongo/models/event.model";
+import {EventPriceResponseDto} from "./event-price-response.dto";
 
 export class EventResponseDto {
     @ApiProperty()
@@ -16,8 +16,8 @@ export class EventResponseDto {
     description: string;
     @ApiProperty()
     date: number;
-    @ApiProperty({type: EventPriceDto, isArray: true})
-    prices: EventPriceDto[];
+    @ApiProperty({type: EventPriceResponseDto, isArray: true})
+    prices: EventPriceResponseDto[];
     @ApiProperty()
     image: string;
     @ApiProperty()
@@ -29,11 +29,22 @@ export class EventResponseDto {
         Object.assign(this, init)
     }
 
-    public static fromDoc(doc: EventDocument): EventResponseDto {
-        return new EventResponseDto({...doc.toObject, _id: doc._id.toString()})
+    public static fromDoc(doc: EventDocument, serviceFee: number): EventResponseDto {
+        return new EventResponseDto({
+            _id: doc._id.toString(),
+            title: doc.title,
+            place: doc.place,
+            address: doc.address,
+            description: doc.description,
+            date: doc.date,
+            prices: doc.prices.map(p => EventPriceResponseDto.fromDoc(p, serviceFee)),
+            image: doc.image,
+            show: doc.show,
+            ended: doc.ended,
+        })
     }
 
-    public static fromModel(model: EventModel): EventResponseDto {
+    public static fromModel(model: EventModel, serviceFee: number): EventResponseDto {
         return {
             _id: model._id.toString(),
             title: model.title,
@@ -41,7 +52,7 @@ export class EventResponseDto {
             address: model.address,
             description: model.description,
             date: model.date,
-            prices: model.prices,
+            prices: model.prices.map(p => EventPriceResponseDto.fromModel(p, serviceFee)),
             image: model.image,
             show: model.show,
             ended: model.ended,

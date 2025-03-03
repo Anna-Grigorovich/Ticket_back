@@ -68,4 +68,21 @@ export class EventRepository {
         const deleted = await this.model.findByIdAndDelete(id).exec();
         return EventModel.fromDoc(deleted);
     }
+
+    async stopSell(startDay: number, endDay: number): Promise<void> {
+        await this.model.updateMany(
+            {
+                date: { $gte: startDay, $lte: endDay },
+                sellEnded: { $ne: true }
+            },
+            { $set: { sellEnded: true } }
+        );
+    }
+
+    async getEventsToClose(): Promise<EventDocument[]> {
+        return this.model.find({
+            dateEnd: { $lte: Date.now() },
+            ended: false
+        })
+    }
 }

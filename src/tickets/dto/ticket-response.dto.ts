@@ -21,9 +21,9 @@ export class TicketResponseDto {
     @ApiProperty({ description: 'Email address of the ticket owner', example: 'example@mail.com' })
     mail: string;
 
-    public static fromModel(model: TicketModel): TicketResponseDto {
+    public static fromModel(model: TicketModel, serviceFee: number): TicketResponseDto {
         return {
-            event: EventResponseDto.fromModel(model.event),
+            event: EventResponseDto.fromModel(model.event, serviceFee),
             code: model.code,
             price: model.price,
             discount: model.discount,

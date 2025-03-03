@@ -4,6 +4,8 @@ import {EventsController} from './events.controller';
 import {ConfigModule} from "@nestjs/config";
 import {UsersModule} from "../users/users.module";
 import {MongoModule} from "../mongo/mongo.module";
+import {SettingsService} from "../services/settings.service";
+import {EventsSchedulerService} from "./events-scheduler.service";
 
 @Module({
     imports: [
@@ -12,7 +14,7 @@ import {MongoModule} from "../mongo/mongo.module";
         UsersModule
     ],
     controllers: [EventsController],
-    providers: [EventsService],
+    providers: [EventsService, SettingsService, EventsSchedulerService],
     exports: [EventsService]
 })
 export class EventsModule {

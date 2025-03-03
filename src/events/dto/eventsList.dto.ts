@@ -9,9 +9,9 @@ export class EventListDto {
     @ApiProperty({ type: Number, description: 'Total number of events found' })
     total: number;
 
-    public static fromModel(model: EventListModel): EventListDto{
+    public static fromModel(model: EventListModel, serviceFee: number): EventListDto{
         return {
-            events: model.events.map(e=> EventResponseDto.fromModel(e)),
+            events: model.events.map(e=> EventResponseDto.fromModel(e, serviceFee)),
             total: model.total
         }
     }

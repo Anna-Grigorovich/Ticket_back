@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import {OrderModel} from "../mongo/models/order.model";
 import {PaymentService} from "../payment/payment.service";
 import {OrderRepository} from "../mongo/repositories/order.repository";
@@ -25,7 +25,8 @@ export class OrderService {
 
     async create(createOrderDto: CreateOrderDto): Promise<CreateOrderResponseDto> {
         const event = await this.eventsService.validatePrice(createOrderDto.eventId, createOrderDto.price);
-        const totalFee: number = roundPrice(createOrderDto.price * this.settingsService.getSettings().serviceFee/100);
+        if (event.sellEnded) throw new BadRequestException('Sell already ended for this event');
+        const totalFee: number = roundPrice(createOrderDto.price * this.settingsService.getSettings().serviceFee / 100);
         const order = await this.orderRepository.create(new OrderModel({
             event,
             mail: createOrderDto.mail,
@@ -46,15 +47,14 @@ export class OrderService {
     async orderPayed(callbackModel: LiqPayCallbackModel): Promise<void> {
         const order = await this.orderRepository.getById(callbackModel.orderId);
         await this.orderRepository.update(order._id.toString(), {payed: true});
-        for (let index = 0; index < order.quantity; index++) {
-            await this.ticketsService.createTicket(
-                order.event._id.toString(),
-                order.mail,
-                order.price,
-                order.serviceFee,
-                callbackModel,
-            )
-        }
+        await this.ticketsService.createTickets(
+            order.event._id.toString(),
+            order.mail,
+            order.price,
+            order.serviceFee,
+            callbackModel,
+            order.quantity
+        )
         // await this.orderRepository.delete(callbackModel.orderId)
         //TODO remove orders on event ends
     }

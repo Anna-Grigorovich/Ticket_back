@@ -14,6 +14,7 @@ import {AppLoggerMiddleware} from "./middlewares/app.logger.middleware";
 import {ExceptionsFilter} from "./filters/exceptions.filter";
 import {APP_FILTER} from "@nestjs/core";
 import { OrderModule } from './order/order.module';
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { OrderModule } from './order/order.module';
         },
       ],
     }),
+    ScheduleModule.forRoot(),
     MongoModule,
     UsersModule,
     AuthModule,

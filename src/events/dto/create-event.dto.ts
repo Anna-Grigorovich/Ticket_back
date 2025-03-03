@@ -27,6 +27,9 @@ export class CreateEventDto {
     @IsNumber()
     @ApiProperty()
     date: number;
+    @IsNumber()
+    @ApiProperty()
+    dateEnd: number;
     @ValidateNested({ each: true })
     @ArrayMinSize(1)
     @Type(() => EventPriceDto)

@@ -11,7 +11,9 @@ export class EventModel {
     address: string;
     description: string;
     date: number;
+    dateEnd: number;
     ended: boolean;
+    sellEnded: boolean;
     prices: EventPriceModel[];
     image: string;
     show: boolean;
@@ -30,7 +32,9 @@ export class EventModel {
             address: doc.address,
             description: doc.description,
             date: doc.date,
+            dateEnd: doc.dateEnd,
             ended: doc.ended,
+            sellEnded: doc.ended,
             prices: doc.prices?.map(p=>EventPriceModel.fromDoc(p)),
             image: doc.image,
             show: doc.show,

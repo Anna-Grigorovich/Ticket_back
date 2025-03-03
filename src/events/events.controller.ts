@@ -25,7 +25,6 @@ import {
     ApiConsumes,
     ApiOperation,
     ApiParam,
-    ApiQuery,
     ApiResponse,
     ApiTags
 } from "@nestjs/swagger";
@@ -33,11 +32,16 @@ import {CreateEventResponseDto} from "./dto/create-event-response.dto";
 import {UploadImageResponseDto} from "./dto/upload-image-response.dto";
 import {EventResponseDto} from "./dto/event-response.dto";
 import {EventListDto} from "./dto/eventsList.dto";
+import {SettingsService} from "../services/settings.service";
+import {SettingsModel} from "../mongo/models/settings.model";
 
 @Controller('events')
 @ApiTags('events')
 export class EventsController {
-    constructor(private readonly eventsService: EventsService) {
+    constructor(
+        private readonly eventsService: EventsService,
+        private readonly settingsService: SettingsService,
+        ) {
     }
 
     @Get(':id')
@@ -45,7 +49,8 @@ export class EventsController {
     @ApiParam({ name: 'id', description: 'The ID of the event', type: String })
     @ApiResponse({type: EventResponseDto})
     async findOne(@Param('id') id: string): Promise<EventResponseDto> {
-        return EventResponseDto.fromDoc(await this.eventsService.findOne(id));
+        const settings: SettingsModel = this.settingsService.getSettings();
+        return EventResponseDto.fromDoc(await this.eventsService.findOne(id), settings.serviceFee);
     }
 
     @Get()
@@ -63,6 +68,7 @@ export class EventsController {
     @ApiBody({type: CreateEventDto})
     @ApiResponse({type: CreateEventResponseDto})
     async create(@Body() createEventDto: CreateEventDto): Promise<CreateEventResponseDto> {
+        this.eventsService.validateDates(createEventDto);
         return CreateEventResponseDto.fromModel(await this.eventsService.create(createEventDto));
     }
 
@@ -108,7 +114,8 @@ export class EventsController {
     @ApiBody({ type: UpdateEventDto })
     @ApiResponse({ type: EventResponseDto })
     async update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto): Promise<EventResponseDto> {
-        return EventResponseDto.fromModel(await this.eventsService.update(id, updateEventDto));
+        const settings: SettingsModel = this.settingsService.getSettings();
+        return EventResponseDto.fromModel(await this.eventsService.update(id, updateEventDto), settings.serviceFee);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -119,6 +126,7 @@ export class EventsController {
     @ApiParam({ name: 'id', description: 'The ID of the event', type: String })
     @ApiResponse({ type: EventResponseDto })
     async remove(@Param('id') id: string): Promise<EventResponseDto> {
-        return EventResponseDto.fromModel(await this.eventsService.remove(id));
+        const settings: SettingsModel = this.settingsService.getSettings();
+        return EventResponseDto.fromModel(await this.eventsService.remove(id), settings.serviceFee);
     }
 }
