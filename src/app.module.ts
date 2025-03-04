@@ -15,6 +15,7 @@ import {ExceptionsFilter} from "./filters/exceptions.filter";
 import {APP_FILTER} from "@nestjs/core";
 import { OrderModule } from './order/order.module';
 import {ScheduleModule} from "@nestjs/schedule";
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import {ScheduleModule} from "@nestjs/schedule";
     EventsModule,
     TicketsModule,
     PaymentModule,
-    OrderModule
+    OrderModule,
+    ReportModule
   ],
   controllers: [],
   providers: [

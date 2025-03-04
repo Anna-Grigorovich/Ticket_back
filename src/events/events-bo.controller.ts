@@ -48,6 +48,7 @@ export class EventsBoController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(EUserRoles.ADMIN, EUserRoles.MANAGER)
     @Get(':id')
+    @ApiBearerAuth()
     @ApiOperation({summary: 'Retrieve a single event by its ID'})
     @ApiParam({name: 'id', description: 'The ID of the event', type: String})
     @ApiResponse({type: EventResponseDto})
@@ -59,6 +60,7 @@ export class EventsBoController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(EUserRoles.ADMIN, EUserRoles.MANAGER)
     @Get()
+    @ApiBearerAuth()
     @ApiOperation({summary: 'Retrieve a list of all events with optional filters'})
     @ApiResponse({type: EventListDto})
     async findList(@Query() params: FindEventDto): Promise<EventListDto> {

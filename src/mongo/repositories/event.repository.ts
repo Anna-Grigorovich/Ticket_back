@@ -7,6 +7,8 @@ import {EventModel} from "../models/event.model";
 import {UpdateEventDto} from "../../events/dto/update-event.dto";
 import {EventListModel} from "../models/event-list.model";
 import {EventReport} from "../schemas/event-report.data";
+import {EventReportListDto} from "../../report/dto/event-report-list.dto";
+import {EventReportDto} from "../../report/dto/event-report.dto";
 
 @Injectable()
 export class EventRepository {
@@ -51,11 +53,30 @@ export class EventRepository {
         }
     }
 
+    async getReportsList(filter: Partial<Event> = {}, skip: number, limit: number): Promise<EventReportListDto> {
+        const events: EventDocument[] = await this.model.aggregate([
+            {$match: filter},
+            {$skip: Number(skip)},
+            {$limit: Number(limit)},
+        ]);
+
+        const total = await this.model.countDocuments(filter).exec();
+
+        return {
+            total,
+            events: events.map(e => EventReportDto.fromDoc(e))
+        }
+    }
+
     async getById(id: string, full: boolean): Promise<EventDocument | null> {
         if (full){
             return await this.model.findOne({ _id: id }).exec();
         }
         return await this.model.findOne({ _id: id, show: true }).exec();
+    }
+
+    async getReportById(id: string): Promise<EventDocument | null> {
+        return await this.model.findOne({ _id: id, ended: true }).exec();
     }
 
     async getByIdWithTickets(id: string): Promise<EventModel> {
