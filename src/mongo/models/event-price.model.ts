@@ -5,6 +5,7 @@ export class EventPriceModel {
     price: number;
     description: string;
     place: string;
+    available: number
 
     constructor(init?: Partial<EventPriceModel>) {
         Object.assign(this, init);
@@ -17,6 +18,7 @@ export class EventPriceModel {
             price: doc.price,
             description: doc.description,
             place: doc.place,
+            available: doc.available
         })
     }
 }

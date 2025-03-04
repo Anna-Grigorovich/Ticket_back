@@ -18,7 +18,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
       .setTitle('TopTickets')
       .setDescription('TopTickets api')
-      .setVersion('1.0')
+      .setVersion('1.01')
       .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, documentFactory);

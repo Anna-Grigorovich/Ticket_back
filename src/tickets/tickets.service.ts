@@ -45,7 +45,7 @@ export class TicketsService {
             const ticketPath = await this.generateTicketPdf(ticket, ticket.event);
             attachments.push({
                 path: ticketPath,
-                filename: `ticket_${i}`
+                filename: `ticket_${i}.pdf`
             })
         }
         await this.mailService.sendMail('topTickets', mail, event.title, attachments);

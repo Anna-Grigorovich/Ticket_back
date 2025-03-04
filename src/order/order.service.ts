@@ -24,7 +24,7 @@ export class OrderService {
     }
 
     async create(createOrderDto: CreateOrderDto): Promise<CreateOrderResponseDto> {
-        const event = await this.eventsService.validatePrice(createOrderDto.eventId, createOrderDto.price);
+        const event = await this.eventsService.validatePrice(createOrderDto.eventId, createOrderDto.price, createOrderDto.quantity);
         if (event.sellEnded) throw new BadRequestException('Sell already ended for this event');
         const totalFee: number = roundPrice(createOrderDto.price * this.settingsService.getSettings().serviceFee / 100);
         const order = await this.orderRepository.create(new OrderModel({
@@ -47,6 +47,7 @@ export class OrderService {
     async orderPayed(callbackModel: LiqPayCallbackModel): Promise<void> {
         const order = await this.orderRepository.getById(callbackModel.orderId);
         await this.orderRepository.update(order._id.toString(), {payed: true});
+        await this.eventsService.decrementAvailable(order.event._id.toString(), order.price, order.quantity);
         await this.ticketsService.createTickets(
             order.event._id.toString(),
             order.mail,

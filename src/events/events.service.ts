@@ -61,12 +61,18 @@ export class EventsService {
         return event
     }
 
-    async validatePrice(id: string, price: number): Promise<EventModel> {
+    async validatePrice(id: string, price: number, quantity: number): Promise<EventModel> {
         const event = EventModel.fromDoc(await this.eventsRepository.getById(id))
-        if (!event) throw new NotFoundException('Not Found');
+        if (!event) throw new BadRequestException('Not Found');
         const priceModel = event.prices.find(p => p.price === price);
-        if (!priceModel) throw new NotFoundException('Price Not Found');
+        if (!priceModel) throw new BadRequestException('Price Not Found');
+        if(priceModel.available<=0) throw new BadRequestException('No more tickets available');
+        if(priceModel.available< quantity) throw new BadRequestException(`Only ${priceModel.available} tickets available`);
         return event;
+    }
+
+    async decrementAvailable(id: string, price: number, quantity: number): Promise<void> {
+        await this.eventsRepository.decrementTicketsCounter(id, price, quantity);
     }
 
     async update(id: string, updateEventDto: UpdateEventDto) {

@@ -13,22 +13,22 @@ import {ApiProperty} from "@nestjs/swagger";
 
 export class CreateEventDto {
     @IsNotEmpty()
-    @ApiProperty()
+    @ApiProperty({ description: 'Event name', example: 'Music Festival' })
     title: string;
     @IsNotEmpty()
-    @ApiProperty()
+    @ApiProperty({ description: 'Event place', example: 'Caribbean club' })
     place: string;
     @IsNotEmpty()
-    @ApiProperty()
+    @ApiProperty({ description: 'Event address', example: 'Mazepy street 3b' })
     address: string;
     @IsNotEmpty()
-    @ApiProperty()
+    @ApiProperty({ description: 'Event description', example: 'Make some fun' })
     description: string;
     @IsNumber()
-    @ApiProperty()
+    @ApiProperty({ description: 'Event date in timestamp ms', example: '1741132800000' })
     date: number;
     @IsNumber()
-    @ApiProperty()
+    @ApiProperty({ description: 'Event end date in timestamp ms', example: '1741132800000' })
     dateEnd: number;
     @ValidateNested({ each: true })
     @ArrayMinSize(1)
@@ -37,14 +37,10 @@ export class CreateEventDto {
     prices: EventPriceDto[];
     @IsOptional()
     @IsString()
-    @ApiProperty({required: false})
+    @ApiProperty({required: false, description: 'not used at the moment'} )
     image: string;
     @IsBoolean()
     @IsOptional()
-    @ApiProperty({required: false})
+    @ApiProperty({required: false, description: 'show/hide event from site', default: true})
     show: boolean
-    @IsBoolean()
-    @IsOptional()
-    @ApiProperty({required: false})
-    ended: boolean
 }

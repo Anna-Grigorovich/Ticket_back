@@ -6,6 +6,9 @@ export class EventPrice {
     @Prop({ type: Number, required: true })
     price: number;
 
+    @Prop({ type: Number, required: true })
+    available: number;
+
     @Prop({ type: String, required: false })
     description: string;
 

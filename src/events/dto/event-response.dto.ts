@@ -16,6 +16,8 @@ export class EventResponseDto {
     description: string;
     @ApiProperty()
     date: number;
+    @ApiProperty()
+    dateEnd: number
     @ApiProperty({type: EventPriceResponseDto, isArray: true})
     prices: EventPriceResponseDto[];
     @ApiProperty()
@@ -24,6 +26,8 @@ export class EventResponseDto {
     show: boolean
     @ApiProperty()
     ended: boolean
+    @ApiProperty()
+    sellEnded: boolean;
 
     constructor(init?: Partial<EventResponseDto>) {
         Object.assign(this, init)
@@ -37,10 +41,12 @@ export class EventResponseDto {
             address: doc.address,
             description: doc.description,
             date: doc.date,
+            dateEnd: doc.dateEnd,
             prices: doc.prices.map(p => EventPriceResponseDto.fromDoc(p, serviceFee)),
             image: doc.image,
             show: doc.show,
             ended: doc.ended,
+            sellEnded: doc.sellEnded,
         })
     }
 
@@ -52,10 +58,12 @@ export class EventResponseDto {
             address: model.address,
             description: model.description,
             date: model.date,
+            dateEnd: model.dateEnd,
             prices: model.prices.map(p => EventPriceResponseDto.fromModel(p, serviceFee)),
             image: model.image,
             show: model.show,
             ended: model.ended,
+            sellEnded: model.sellEnded,
         }
     }
 }

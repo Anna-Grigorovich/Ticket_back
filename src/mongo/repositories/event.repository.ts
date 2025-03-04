@@ -85,4 +85,16 @@ export class EventRepository {
             ended: false
         })
     }
+
+    async decrementTicketsCounter(id: string, price: number, quantity: number): Promise<void> {
+        await this.model.updateOne(
+            {
+                _id: id,
+                'prices.price': price,
+            },
+            {
+                $inc: { 'prices.$.available': -quantity },
+            }
+        );
+    }
 }
