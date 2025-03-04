@@ -8,6 +8,9 @@ export class EventPriceResponseDto {
     price: number;
 
     @ApiProperty()
+    available: number;
+
+    @ApiProperty()
     serviceFee: number;
 
     @ApiProperty()
@@ -23,6 +26,7 @@ export class EventPriceResponseDto {
         const fee = roundPrice(serviceFee/100 * price.price);
         return {
             price: price.price,
+            available: price.available,
             serviceFee: fee,
             priceTotal: price.price + fee,
             place: price.place,
@@ -34,6 +38,7 @@ export class EventPriceResponseDto {
         const fee = roundPrice(serviceFee/100 * price.price);
         return {
             price: price.price,
+            available: price.available,
             serviceFee: fee,
             priceTotal: price.price + fee,
             place: price.place,

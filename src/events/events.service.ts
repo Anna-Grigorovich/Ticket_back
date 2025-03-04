@@ -76,6 +76,8 @@ export class EventsService {
     }
 
     async update(id: string, updateEventDto: UpdateEventDto) {
+        const event = EventModel.fromDoc(await this.eventsRepository.getById(id))
+        if(event.ended) throw new BadRequestException('Cannot edit ended event');
         return await this.eventsRepository.updateById(id, updateEventDto)
     }
 
