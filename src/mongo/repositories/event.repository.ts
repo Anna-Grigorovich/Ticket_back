@@ -6,6 +6,7 @@ import {CreateEventDto} from "../../events/dto/create-event.dto";
 import {EventModel} from "../models/event.model";
 import {UpdateEventDto} from "../../events/dto/update-event.dto";
 import {EventListModel} from "../models/event-list.model";
+import {EventReport} from "../schemas/event-report.data";
 
 @Injectable()
 export class EventRepository {
@@ -50,8 +51,11 @@ export class EventRepository {
         }
     }
 
-    async getById(id: string): Promise<EventDocument> {
-        return await this.model.findById(id).exec();
+    async getById(id: string, full: boolean): Promise<EventDocument | null> {
+        if (full){
+            return await this.model.findOne({ _id: id }).exec();
+        }
+        return await this.model.findOne({ _id: id, show: true }).exec();
     }
 
     async getByIdWithTickets(id: string): Promise<EventModel> {
@@ -96,5 +100,12 @@ export class EventRepository {
                 $inc: { 'prices.$.available': -quantity },
             }
         );
+    }
+
+    async closeEvent(id: string, report: EventReport): Promise<void> {
+        await this.model.findByIdAndUpdate(id, {
+            ended: true,
+            report: report,
+        }).exec();
     }
 }

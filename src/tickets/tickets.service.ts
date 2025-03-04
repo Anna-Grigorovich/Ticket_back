@@ -37,7 +37,7 @@ export class TicketsService {
     }
 
     async createTickets(eventId: string, mail: string, price: number, serviceFee: number, payment: LiqPayCallbackModel, quantity: number) {
-        const event = await this.eventsRepository.getById(eventId)
+        const event = await this.eventsRepository.getById(eventId, true)
         if (!event) throw new NotFoundException('Event Not Found, Can`t create ticket');
         const attachments: IAttachment[] = [];
         for (let i=0; i < quantity; i++) {

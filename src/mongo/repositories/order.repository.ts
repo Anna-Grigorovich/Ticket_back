@@ -31,4 +31,7 @@ export class OrderRepository {
         await this.model.deleteMany({ payed: true }).exec();
     }
 
+    async cleanUp(eventId: string){
+        await this.model.deleteMany({ event: eventId }).exec();
+    }
 }

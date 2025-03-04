@@ -26,7 +26,7 @@ export class EventsSchedulerService {
         const events = await this.eventsRepository.getEventsToClose();
         const eventsModels = events.map(e => EventModel.fromDoc(e))
         for (const eventModel of eventsModels) {
-            await this.eventService.closeEvent(eventModel);
+            await this.eventService.closeEvent(eventModel._id.toString());
         }
     }
 }

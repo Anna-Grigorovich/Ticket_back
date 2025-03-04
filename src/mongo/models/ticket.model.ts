@@ -2,6 +2,7 @@ import {Types} from "mongoose";
 import ObjectId = Types.ObjectId;
 import {TicketDocument} from "../schemas/ticket.schema";
 import {EventModel} from "./event.model";
+import {PaymentData} from "../schemas/payment.data";
 
 export class TicketModel {
     _id: ObjectId;
@@ -13,7 +14,7 @@ export class TicketModel {
     mail: string;
     price: number;
     serviceFee: number;
-    payment: object;
+    payment: PaymentData;
 
     constructor(init?: Partial<TicketModel>) {
         Object.assign(this, init);

@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import {CreateEventDto} from './dto/create-event.dto';
 import {UpdateEventDto} from './dto/update-event.dto';
 import {Jimp} from "jimp";
@@ -11,15 +11,22 @@ import {EventListDto} from "./dto/eventsList.dto";
 import {EventModel} from "../mongo/models/event.model";
 import {SettingsService} from "../services/settings.service";
 import {SettingsModel} from "../mongo/models/settings.model";
+import {TicketModel} from "../mongo/models/ticket.model";
+import {EventReport, EventReportDocument} from "../mongo/schemas/event-report.data";
+import {TicketRepository} from "../mongo/repositories/ticket.repository";
+import {OrderRepository} from "../mongo/repositories/order.repository";
 
 @Injectable()
 export class EventsService {
+    private logger: Logger = new Logger(EventsService.name);
+
     constructor(
         private configService: ConfigService,
         private eventsRepository: EventRepository,
+        private ticketsRepository: TicketRepository,
+        private ordersRepository: OrderRepository,
         private settingsService: SettingsService,
-    ) {
-    }
+    ) {}
 
     validateDates(createEventDto: CreateEventDto){
         if(createEventDto.dateEnd < createEventDto.date) throw new BadRequestException('Invalid end date');
@@ -30,9 +37,12 @@ export class EventsService {
         return await this.eventsRepository.create(createEventDto);
     }
 
-    async getList(params: FindEventDto): Promise<EventListDto> {
+    async getList(params: FindEventDto, full: boolean = false): Promise<EventListDto> {
         const {search, dateFrom, dateTo, skip = 0, limit = 10} = params;
         const filter: any = {};
+        if(!full){
+            filter.show = true
+        }
         const settings: SettingsModel = this.settingsService.getSettings();
         if (search) {
             filter.$or = [
@@ -55,14 +65,14 @@ export class EventsService {
         return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit), settings.serviceFee)
     }
 
-    async findOne(id: string) {
-        const event = await this.eventsRepository.getById(id)
+    async findOne(id: string, full: boolean = false) {
+        const event = await this.eventsRepository.getById(id, full)
         if (!event) throw new NotFoundException('Not Found');
         return event
     }
 
     async validatePrice(id: string, price: number, quantity: number): Promise<EventModel> {
-        const event = EventModel.fromDoc(await this.eventsRepository.getById(id))
+        const event = EventModel.fromDoc(await this.eventsRepository.getById(id, true))
         if (!event) throw new BadRequestException('Not Found');
         const priceModel = event.prices.find(p => p.price === price);
         if (!priceModel) throw new BadRequestException('Price Not Found');
@@ -76,7 +86,7 @@ export class EventsService {
     }
 
     async update(id: string, updateEventDto: UpdateEventDto) {
-        const event = EventModel.fromDoc(await this.eventsRepository.getById(id))
+        const event = EventModel.fromDoc(await this.eventsRepository.getById(id, true))
         if(event.ended) throw new BadRequestException('Cannot edit ended event');
         return await this.eventsRepository.updateById(id, updateEventDto)
     }
@@ -121,7 +131,45 @@ export class EventsService {
         }
     }
 
-    async closeEvent(event: EventModel){
-        //TODO close event and make a report
+    async closeEvent(id: string): Promise<void> {
+        const eventWithTickets = await this.eventsRepository.getByIdWithTickets(id);
+        if (!eventWithTickets) {
+            throw new Error('Event not found');
+        }
+        if (eventWithTickets.ended) {
+            throw new Error('Event is already closed.');
+        }
+        const tickets: TicketModel[] = eventWithTickets.tickets || [];
+
+        // Calculate report data
+        const ticketsSell = tickets.length;
+        const totalPrice = tickets.reduce((acc, ticket) => acc + ticket.price, 0);
+        const totalServiceFee = tickets.reduce((acc, ticket) => acc + ticket.serviceFee, 0);
+
+        const totalReceiverCommission = tickets.reduce(
+            (acc, ticket: TicketModel) => acc + ticket.payment?.receiverCommission || 0,
+            0
+        );
+        const total = totalPrice + totalServiceFee - totalReceiverCommission;
+
+        // Create the report object
+        const report: EventReport = {
+            tickets_sell: ticketsSell,
+            price: totalPrice,
+            serviceFee: totalServiceFee,
+            lp_receiver_commission: totalReceiverCommission,
+            total: total,
+        };
+
+        await this.eventsRepository.closeEvent(id, report);
+
+
+        // Remove all associated tickets from the database
+        await this.ticketsRepository.cleanUp(id);
+        // Remove all associated orders from the database
+        await this.ordersRepository.cleanUp(id);
+
+        this.logger.log(`Event ${id} closed successfully.`);
     }
+
 }

@@ -6,6 +6,7 @@ import {UsersModule} from "../users/users.module";
 import {MongoModule} from "../mongo/mongo.module";
 import {SettingsService} from "../services/settings.service";
 import {EventsSchedulerService} from "./events-scheduler.service";
+import {EventsBoController} from "./events-bo.controller";
 
 @Module({
     imports: [
@@ -13,7 +14,7 @@ import {EventsSchedulerService} from "./events-scheduler.service";
         MongoModule,
         UsersModule
     ],
-    controllers: [EventsController],
+    controllers: [EventsController, EventsBoController],
     providers: [EventsService, SettingsService, EventsSchedulerService],
     exports: [EventsService]
 })

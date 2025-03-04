@@ -63,4 +63,8 @@ export class TicketRepository {
         const deleted = await this.model.findByIdAndDelete(id).exec();
         return TicketModel.fromDoc(deleted);
     }
+
+    async cleanUp(eventId: string){
+        await this.model.deleteMany({ event: eventId }).exec();
+    }
 }
