@@ -9,6 +9,7 @@ import {EventListModel} from "../models/event-list.model";
 import {EventReportDto} from "../../report/dto/event-report.dto";
 import {EventsStatsModel} from "../models/events-stats.model";
 import {OrderModel} from "../models/order.model";
+import {EventReportListDto} from "../../report/dto/event-report-list.dto";
 
 @Injectable()
 export class EventRepository {
