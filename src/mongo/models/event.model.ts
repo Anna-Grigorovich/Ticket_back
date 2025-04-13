@@ -3,6 +3,7 @@ import ObjectId = Types.ObjectId;
 import {EventDocument} from "../schemas/event.schema";
 import {TicketModel} from "./ticket.model";
 import {EventPriceModel} from "./event-price.model";
+import {ReportModel} from "./report.model";
 
 export class EventModel {
     _id: ObjectId;
@@ -18,6 +19,7 @@ export class EventModel {
     image: string;
     show: boolean;
     tickets?: TicketModel[]
+    report: ReportModel
 
     constructor(init?: Partial<EventModel>) {
         Object.assign(this, init);
@@ -38,7 +40,8 @@ export class EventModel {
             prices: doc.prices?.map(p=>EventPriceModel.fromDoc(p)),
             image: doc.image,
             show: doc.show,
-            tickets: doc.tickets?.map(t => TicketModel.fromDoc(t))
+            tickets: doc.tickets?.map(t => TicketModel.fromDoc(t)),
+            report: ReportModel.fromDoc(doc.report)
         })
     }
 }

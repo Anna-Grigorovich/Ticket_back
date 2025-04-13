@@ -11,10 +11,9 @@ import {EventListDto} from "./dto/eventsList.dto";
 import {EventModel} from "../mongo/models/event.model";
 import {SettingsService} from "../services/settings.service";
 import {SettingsModel} from "../mongo/models/settings.model";
-import {TicketModel} from "../mongo/models/ticket.model";
-import {EventReport, EventReportDocument} from "../mongo/schemas/event-report.data";
 import {TicketRepository} from "../mongo/repositories/ticket.repository";
 import {OrderRepository} from "../mongo/repositories/order.repository";
+import {OrderModel} from "../mongo/models/order.model";
 
 @Injectable()
 export class EventsService {
@@ -37,7 +36,7 @@ export class EventsService {
         return await this.eventsRepository.create(createEventDto);
     }
 
-    async getList(params: FindEventDto, full: boolean = false): Promise<EventListDto> {
+    async getList(params: FindEventDto, full: boolean = false, withReport: boolean = false): Promise<EventListDto> {
         const {search, dateFrom, dateTo, onlyActive, skip = 0, limit = 10} = params;
         const filter: any = {};
         if(!full){
@@ -66,7 +65,7 @@ export class EventsService {
             filter.show = true;
             filter.ended = false;
         }
-        return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit), settings.serviceFee)
+        return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit), settings.serviceFee, withReport)
     }
 
     async findOne(id: string, full: boolean = false) {
@@ -85,8 +84,8 @@ export class EventsService {
         return event;
     }
 
-    async decrementAvailable(id: string, price: number, quantity: number): Promise<void> {
-        await this.eventsRepository.decrementTicketsCounter(id, price, quantity);
+    async addToReport(order: OrderModel): Promise<void> {
+        await this.eventsRepository.addToReport(order);
     }
 
     async update(id: string, updateEventDto: UpdateEventDto) {
@@ -142,37 +141,15 @@ export class EventsService {
     }
 
     async closeEvent(id: string): Promise<void> {
-        const eventWithTickets = await this.eventsRepository.getByIdWithTickets(id);
-        if (!eventWithTickets) {
+        const event = await this.eventsRepository.getById(id, true);
+        if (!event) {
             throw new Error('Event not found');
         }
-        if (eventWithTickets.ended) {
+        if (event.ended) {
             throw new Error('Event is already closed.');
         }
-        const tickets: TicketModel[] = eventWithTickets.tickets || [];
 
-        // Calculate report data
-        const ticketsSell = tickets.length;
-        const totalPrice = tickets.reduce((acc, ticket) => acc + ticket.price, 0);
-        const totalServiceFee = tickets.reduce((acc, ticket) => acc + ticket.serviceFee, 0);
-
-        const totalReceiverCommission = tickets.reduce(
-            (acc, ticket: TicketModel) => acc + ticket.payment?.receiverCommission || 0,
-            0
-        );
-        const total = totalPrice + totalServiceFee - totalReceiverCommission;
-
-        // Create the report object
-        const report: EventReport = {
-            tickets_sell: ticketsSell,
-            price: totalPrice,
-            serviceFee: totalServiceFee,
-            lp_receiver_commission: totalReceiverCommission,
-            total: total,
-        };
-
-        await this.eventsRepository.closeEvent(id, report);
-
+        await this.eventsRepository.closeEvent(id);
 
         // Remove all associated tickets from the database
         await this.ticketsRepository.cleanUp(id);

@@ -6,10 +6,9 @@ import {CreateEventDto} from "../../events/dto/create-event.dto";
 import {EventModel} from "../models/event.model";
 import {UpdateEventDto} from "../../events/dto/update-event.dto";
 import {EventListModel} from "../models/event-list.model";
-import {EventReport} from "../schemas/event-report.data";
-import {EventReportListDto} from "../../report/dto/event-report-list.dto";
 import {EventReportDto} from "../../report/dto/event-report.dto";
 import {EventsStatsModel} from "../models/events-stats.model";
+import {OrderModel} from "../models/order.model";
 
 @Injectable()
 export class EventRepository {
@@ -122,7 +121,6 @@ export class EventRepository {
         };
     }
 
-
     async getById(id: string, full: boolean): Promise<EventDocument | null> {
         if (full){
             return await this.model.findOne({ _id: id }).exec();
@@ -166,22 +164,29 @@ export class EventRepository {
         })
     }
 
-    async decrementTicketsCounter(id: string, price: number, quantity: number): Promise<void> {
+    async addToReport(order: OrderModel): Promise<void> {
+        const {price, serviceFee, quantity, providerFee} = order;
         await this.model.updateOne(
             {
-                _id: id,
-                'prices.price': price,
+                _id: order.event._id,
+                'prices.price': price
             },
             {
-                $inc: { 'prices.$.available': -quantity },
+                $inc: {
+                    'prices.$.available': -quantity,
+                    'report.tickets_sell': quantity,
+                    'report.price': price * quantity,
+                    'report.serviceFee': serviceFee * quantity,
+                    'report.lp_receiver_commission': providerFee,
+                    'report.total': (price + serviceFee) * quantity - providerFee
+                }
             }
-        );
+        ).exec();
     }
 
-    async closeEvent(id: string, report: EventReport): Promise<void> {
+    async closeEvent(id: string): Promise<void> {
         await this.model.findByIdAndUpdate(id, {
             ended: true,
-            report: report,
         }).exec();
     }
 }

@@ -2,6 +2,7 @@ import {ApiProperty} from "@nestjs/swagger";
 import {EventDocument} from "../../mongo/schemas/event.schema";
 import {EventModel} from "../../mongo/models/event.model";
 import {EventPriceResponseDto} from "./event-price-response.dto";
+import {ReportDto} from "../../report/dto/report.dto";
 
 export class EventResponseDto {
     @ApiProperty()
@@ -28,12 +29,14 @@ export class EventResponseDto {
     ended: boolean
     @ApiProperty()
     sellEnded: boolean;
+    @ApiProperty({type: ReportDto})
+    report: ReportDto;
 
     constructor(init?: Partial<EventResponseDto>) {
         Object.assign(this, init)
     }
 
-    public static fromDoc(doc: EventDocument, serviceFee: number): EventResponseDto {
+    public static fromDoc(doc: EventDocument, serviceFee: number, withReport: boolean = false): EventResponseDto {
         return new EventResponseDto({
             _id: doc._id.toString(),
             title: doc.title,
@@ -47,10 +50,11 @@ export class EventResponseDto {
             show: doc.show,
             ended: doc.ended,
             sellEnded: doc.sellEnded,
+            report: withReport? ReportDto.fromDoc(doc.report): undefined
         })
     }
 
-    public static fromModel(model: EventModel, serviceFee: number): EventResponseDto {
+    public static fromModel(model: EventModel, serviceFee: number, withReport: boolean = false): EventResponseDto {
         return {
             _id: model._id.toString(),
             title: model.title,
@@ -64,6 +68,7 @@ export class EventResponseDto {
             show: model.show,
             ended: model.ended,
             sellEnded: model.sellEnded,
+            report: withReport? ReportDto.fromModel(model.report): undefined
         }
     }
 }

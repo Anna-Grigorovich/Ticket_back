@@ -28,7 +28,7 @@ export class Event {
     image: string;
     @Prop({type: Boolean, default: true})
     show: boolean;
-    @Prop({ type: EventReportSchema, default: null })
+    @Prop({ type: EventReportSchema, default: () => ({}) })
     report: EventReportDocument
 }
 

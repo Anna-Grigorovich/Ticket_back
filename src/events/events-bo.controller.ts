@@ -31,10 +31,10 @@ import {
 import {CreateEventResponseDto} from "./dto/create-event-response.dto";
 import {UploadImageResponseDto} from "./dto/upload-image-response.dto";
 import {EventResponseDto} from "./dto/event-response.dto";
-import {EventListDto} from "./dto/eventsList.dto";
 import {SettingsService} from "../services/settings.service";
 import {SettingsModel} from "../mongo/models/settings.model";
 import {CloseEventDto} from "./dto/close-event.dto";
+import {EventListDto} from "./dto/eventsList.dto";
 
 @Controller('events-bo')
 @ApiTags('events-bo')
@@ -54,7 +54,7 @@ export class EventsBoController {
     @ApiResponse({type: EventResponseDto})
     async findOne(@Param('id') id: string): Promise<EventResponseDto> {
         const settings: SettingsModel = this.settingsService.getSettings();
-        return EventResponseDto.fromDoc(await this.eventsService.findOne(id, true), settings.serviceFee);
+        return EventResponseDto.fromDoc(await this.eventsService.findOne(id, true), settings.serviceFee, true);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -64,7 +64,7 @@ export class EventsBoController {
     @ApiOperation({summary: 'Retrieve a list of all events with optional filters'})
     @ApiResponse({type: EventListDto})
     async findList(@Query() params: FindEventDto): Promise<EventListDto> {
-        return await this.eventsService.getList(params, true)
+        return await this.eventsService.getList(params, true, true)
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

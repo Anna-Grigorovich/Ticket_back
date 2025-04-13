@@ -14,6 +14,8 @@ export class Order {
     price: number;
     @Prop()
     serviceFee: number;
+    @Prop({default: 0})
+    providerFee: number;
     @Prop()
     quantity: number;
     @Prop()

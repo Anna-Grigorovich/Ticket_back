@@ -1,10 +1,7 @@
 import {Types} from "mongoose";
 import ObjectId = Types.ObjectId;
-import {TicketDocument} from "../schemas/ticket.schema";
 import {EventModel} from "./event.model";
 import {OrderDocument} from "../schemas/order.schema";
-import {CreateOrderDto} from "../../order/dto/create-order.dto";
-import {CreateOrderResponseDto} from "../../order/dto/create-order-response.dto";
 
 export class OrderModel {
     _id: ObjectId;
@@ -12,6 +9,7 @@ export class OrderModel {
     mail: string;
     price: number;
     serviceFee: number;
+    providerFee: number;
     quantity: number;
     payed: boolean;
     payment: object;
@@ -30,6 +28,7 @@ export class OrderModel {
             payed: doc.payed,
             payment: doc.payment,
             serviceFee: doc.serviceFee,
+            providerFee: doc.providerFee,
             quantity: doc.quantity
         })
     }

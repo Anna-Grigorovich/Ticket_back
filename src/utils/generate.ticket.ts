@@ -1,7 +1,6 @@
 import {generateBarcode, generateQRCode} from './generate.codes';
 import {EventModel} from "../mongo/models/event.model";
 import {TicketModel} from "../mongo/models/ticket.model";
-import {EventPrice} from "../mongo/schemas/event.price";
 import {EventPriceModel} from "../mongo/models/event-price.model";
 
 const PDFDocument = require('pdfkit');
@@ -38,18 +37,19 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     doc.pipe(fs.createWriteStream(outputPath));
 
     // POSTER IMAGE
-    let calculatedHeight = 300
-    if (fs.existsSync(posterPath)) {
-        const {width: originalWidth, height: originalHeight} = await getImageDimensions(posterPath);
-        const desiredWidth = 200; // Set the width of the image
-        const aspectRatio = originalHeight / originalWidth;
-        calculatedHeight = desiredWidth * aspectRatio; // Calculate the proportional height
-        doc.image(posterPath, 25, 25, {
-            width: desiredWidth
-        });
-    } else {
-        console.error(`Image not found at path: ${posterPath}`);
+    if (!fs.existsSync(posterPath)) {
+        console.warn(`Image not found at path: ${posterPath}`);
+        posterPath = './resources/empty_poster.jpg'
     }
+
+    let calculatedHeight = 300
+    const {width: originalWidth, height: originalHeight} = await getImageDimensions(posterPath);
+    const desiredWidth = 200; // Set the width of the image
+    const aspectRatio = originalHeight / originalWidth;
+    calculatedHeight = desiredWidth * aspectRatio; // Calculate the proportional height
+    doc.image(posterPath, 25, 25, {
+        width: desiredWidth
+    });
 
     // EVENT BARCODE
     const barcodeSvg = generateBarcode(ticket._id.toString());
@@ -95,14 +95,14 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     }
     // FOOTER
     doc.image('./resources/footer.jpg', 0, 755, {width: 595});
-    doc.font('Play').fontSize(10).fillColor('white').text('tel: 063 603 7569', 25, 780);
-    doc.font('Play').fontSize(10).text('mail: kievkills@gmail.com');
+    doc.font('Play').fontSize(10).text('tel: 063 603 7569', 25, 780);
+    doc.font('Play').fontSize(10).text('mail: topticketspay@gmail.com');
     doc.font('Play').fontSize(10).text('вул. Михайла Омеляновича-Павленка 4/6, Kyiv, Ukraine');
     doc.end();
 };
-
+//
 // createTicketPdf(
-//     '64b1f00c2c16b8e25b485ff7',
-//     {title: "Концерт жаби і гадюки", place: "Жопа кабана", address: "", date: Date.now(), price: 250, image: '', description: ''},
+//     { price: 250},
+//     {title: "Концерт жаби і гадюки", place: "Жопа кабана",address: "wwgewegwge", date: Date.now(), description: 'weweg weg weg  egw'},
 //     'F:/projects/kibalnik_back/uploads/images/67016312dde4a9a228bbb64d.jpg',
 //     'F:/projects/kibalnik_back/temp/out.pdf')

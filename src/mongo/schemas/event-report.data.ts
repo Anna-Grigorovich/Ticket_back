@@ -3,15 +3,15 @@ import {HydratedDocument} from "mongoose";
 
 @Schema()
 export class EventReport {
-    @Prop()
+    @Prop({ default: 0 })
     tickets_sell: number;
-    @Prop()
+    @Prop({ default: 0 })
     price: number;
-    @Prop()
+    @Prop({ default: 0 })
     serviceFee: number;
-    @Prop()
+    @Prop({ default: 0 })
     lp_receiver_commission: number;
-    @Prop()
+    @Prop({ default: 0 })
     total: number;
 }
 

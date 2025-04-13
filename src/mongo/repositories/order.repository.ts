@@ -19,8 +19,9 @@ export class OrderRepository {
         return OrderModel.fromDoc(order)
     }
 
-    async update(id: string, order: Partial<OrderModel>): Promise<void>{
-        await this.model.findByIdAndUpdate(id, order, {new: true}).exec();
+    async update(id: string, order: Partial<OrderModel>): Promise<OrderModel>{
+        const updated = await this.model.findByIdAndUpdate(id, order, { new: true }).exec();
+        return OrderModel.fromDoc(updated);
     }
 
     async delete(id: string): Promise<void> {
