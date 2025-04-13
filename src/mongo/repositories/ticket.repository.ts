@@ -5,6 +5,7 @@ import {Ticket, TicketDocument} from "../schemas/ticket.schema";
 import {CreateTicketDto} from "../../tickets/dto/create-ticket.dto";
 import {TicketModel} from "../models/ticket.model";
 import {TicketsListModel} from "../models/tickets-list.model";
+import {TicketsStatsModel} from "../models/tickets-stats.model";
 
 @Injectable()
 export class TicketRepository {
@@ -47,6 +48,34 @@ export class TicketRepository {
             total,
             tickets: tickets.map(e => TicketModel.fromDoc(e))
         }
+    }
+
+    async getDashboardStats(): Promise<TicketsStatsModel> {
+        const [result] = await this.model.aggregate([
+            {
+                $facet: {
+                    globalAvailable: [
+                        { $match: { scanned: false } },
+                        { $count: 'value' }
+                    ],
+                    globalScanned: [
+                        { $match: { scanned: true } },
+                        { $count: 'value' }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    totalAvailable: { $ifNull: [{ $arrayElemAt: ['$globalAvailable.value', 0] }, 0] },
+                    totalScanned: { $ifNull: [{ $arrayElemAt: ['$globalScanned.value', 0] }, 0] },
+                }
+            }
+        ]);
+
+        return {
+            totalAvailable: result.totalAvailable,
+            totalScanned: result.totalScanned,
+        };
     }
 
     async getById(id: string): Promise<TicketModel> {

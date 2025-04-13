@@ -3,7 +3,6 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import {ConfigModule, ConfigService} from "@nestjs/config";
 import {appConfig} from "./config/app.config";
-import {MongooseModule} from "@nestjs/mongoose";
 import { EventsModule } from './events/events.module';
 import { TicketsModule } from './tickets/tickets.module';
 import {ServeStaticModule} from "@nestjs/serve-static";
@@ -16,6 +15,7 @@ import {APP_FILTER} from "@nestjs/core";
 import { OrderModule } from './order/order.module';
 import {ScheduleModule} from "@nestjs/schedule";
 import { ReportModule } from './report/report.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -41,7 +41,8 @@ import { ReportModule } from './report/report.module';
     TicketsModule,
     PaymentModule,
     OrderModule,
-    ReportModule
+    ReportModule,
+    DashboardModule
   ],
   controllers: [],
   providers: [

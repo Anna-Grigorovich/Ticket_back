@@ -38,7 +38,7 @@ export class EventsService {
     }
 
     async getList(params: FindEventDto, full: boolean = false): Promise<EventListDto> {
-        const {search, dateFrom, dateTo, skip = 0, limit = 10} = params;
+        const {search, dateFrom, dateTo, onlyActive, skip = 0, limit = 10} = params;
         const filter: any = {};
         if(!full){
             filter.show = true
@@ -61,6 +61,10 @@ export class EventsService {
             if (dateTo) {
                 filter.date.$lte = dateTo;
             }
+        }
+        if(onlyActive){
+            filter.show = true;
+            filter.ended = false;
         }
         return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit), settings.serviceFee)
     }
@@ -92,8 +96,14 @@ export class EventsService {
     }
 
     async remove(id: string) {
-        await this.removeFileById(id)
-        return await this.eventsRepository.deleteById(id);
+        const doc = await this.eventsRepository.getById(id, true);
+        if (!doc) throw new BadRequestException('Event not found');
+
+        const event = EventModel.fromDoc(doc);
+        if (!event.ended) throw new BadRequestException('Cannot remove not ended event');
+
+        await this.removeFileById(id);
+        return  await this.eventsRepository.deleteById(id);
     }
 
     async removeFileById(id: string): Promise<void> {

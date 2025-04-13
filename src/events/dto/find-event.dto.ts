@@ -1,5 +1,5 @@
 import {ApiPropertyOptional} from "@nestjs/swagger";
-import {IsNumber, IsOptional, IsString} from "class-validator";
+import {IsBoolean, IsNumber, IsOptional, IsString} from "class-validator";
 import {Type} from "class-transformer";
 
 export class FindEventDto {
@@ -25,6 +25,12 @@ export class FindEventDto {
     @IsNumber()
     @Type(() => Number)
     skip: number;
+
+    @ApiPropertyOptional({ description: 'Show only active events' })
+    @IsOptional()
+    @IsBoolean()
+    @Type(() => Boolean)
+    onlyActive: number;
 
     @ApiPropertyOptional({ description: 'Maximum number of records to return', example: 10 })
     @IsOptional()

@@ -9,6 +9,7 @@ import {EventListModel} from "../models/event-list.model";
 import {EventReport} from "../schemas/event-report.data";
 import {EventReportListDto} from "../../report/dto/event-report-list.dto";
 import {EventReportDto} from "../../report/dto/event-report.dto";
+import {EventsStatsModel} from "../models/events-stats.model";
 
 @Injectable()
 export class EventRepository {
@@ -67,6 +68,60 @@ export class EventRepository {
             events: events.map(e => EventReportDto.fromDoc(e))
         }
     }
+
+    async getDashboardStats(): Promise<EventsStatsModel> {
+        const now = Date.now();
+        const [result] = await this.model.aggregate([
+            {
+                $facet: {
+                    total: [{ $count: 'value' }],
+                    hidden: [{ $match: { show: false } }, { $count: 'value' }],
+                    inSell: [{ $match: { sellEnded: false } }, { $count: 'value' }],
+                    currentEvents: [
+                        {
+                            $match: {
+                                ended: false,
+                                date: { $lt: now },
+                                dateEnd: { $gt: now }
+                            }
+                        },
+                        { $project: { title: 1, _id: 0 } }
+                    ],
+                    reportTotals: [
+                        {
+                            $group: {
+                                _id: null,
+                                totalTicketsSold: { $sum: '$report.tickets_sell' },
+                                totalRevenue: { $sum: '$report.total' }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    total: { $arrayElemAt: ['$total.value', 0] },
+                    hidden: { $arrayElemAt: ['$hidden.value', 0] },
+                    inSell: { $arrayElemAt: ['$inSell.value', 0] },
+                    currentEvents: '$currentEvents',
+                    totalTicketsSold: {
+                        $ifNull: [{ $arrayElemAt: ['$reportTotals.totalTicketsSold', 0] }, 0]
+                    },
+                    totalRevenue: {
+                        $ifNull: [{ $arrayElemAt: ['$reportTotals.totalRevenue', 0] }, 0]
+                    }
+                }
+            }]);
+        return {
+            total: result.total || 0,
+            hidden: result.hidden || 0,
+            inSell: result.inSell || 0,
+            currentEvents: result.currentEvents.map(e => e.title),
+            totalTicketsSold: result.totalTicketsSold,
+            totalRevenue: result.totalRevenue
+        };
+    }
+
 
     async getById(id: string, full: boolean): Promise<EventDocument | null> {
         if (full){
