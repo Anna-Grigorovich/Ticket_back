@@ -64,7 +64,7 @@ export class EventsBoController {
     @ApiOperation({summary: 'Retrieve a list of all events with optional filters'})
     @ApiResponse({type: EventListDto})
     async findList(@Query() params: FindEventDto): Promise<EventListDto> {
-        return await this.eventsService.getList(params, true, true)
+        return await this.eventsService.getListBo(params, true, true)
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

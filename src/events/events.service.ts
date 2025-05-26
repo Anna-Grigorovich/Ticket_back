@@ -36,7 +36,34 @@ export class EventsService {
         return await this.eventsRepository.create(createEventDto);
     }
 
-    async getList(params: FindEventDto, full: boolean = false, withReport: boolean = false): Promise<EventListDto> {
+    async getList(params: FindEventDto): Promise<EventListDto> {
+        const {search, dateFrom, dateTo, skip = 0, limit = 10} = params;
+        const filter: any = {};
+        filter.show = true
+        filter.ended = false;
+        const settings: SettingsModel = this.settingsService.getSettings();
+        if (search) {
+            filter.$or = [
+                {title: new RegExp(search, 'i')},
+                {place: new RegExp(search, 'i')},
+                {address: new RegExp(search, 'i')},
+                {description: new RegExp(search, 'i')}
+            ];
+        }
+
+        if (dateFrom || dateTo) {
+            filter.date = {};
+            if (dateFrom) {
+                filter.date.$gte = dateFrom;
+            }
+            if (dateTo) {
+                filter.date.$lte = dateTo;
+            }
+        }
+        return EventListDto.fromModel(await this.eventsRepository.getList(filter, skip, limit), settings.serviceFee, false)
+    }
+
+    async getListBo(params: FindEventDto, full: boolean = false, withReport: boolean = false): Promise<EventListDto> {
         const {search, dateFrom, dateTo, onlyActive, skip = 0, limit = 10} = params;
         const filter: any = {};
         if(!full){
