@@ -15,10 +15,9 @@ export const generateBarcode = (mongodbId: string) => {
 
     JsBarcode(svgNode, mongodbId, {
         xmlDocument: document,
-        displayValue: true,
-        format: 'CODE128'
+        displayValue: false,
+        format: 'CODE128',
     });
 
-    const svgText = xmlSerializer.serializeToString(svgNode);
-    return svgText
+    return  xmlSerializer.serializeToString(svgNode);
 };

@@ -2,13 +2,14 @@ import {generateBarcode, generateQRCode} from './generate.codes';
 import {EventModel} from "../mongo/models/event.model";
 import {TicketModel} from "../mongo/models/ticket.model";
 import {EventPriceModel} from "../mongo/models/event-price.model";
+import {Types} from "mongoose";
 
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const sharp = require('sharp');
 
 const svgToPng = async (svgText: string) => {
-    return await sharp(Buffer.from(svgText)).png().toBuffer();
+    return await sharp(Buffer.from(svgText), { density: 300 }).png().toBuffer();
 };
 
 const getImageDimensions = async (imagePath: string) => {
@@ -55,6 +56,7 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     const barcodeSvg = generateBarcode(ticket._id.toString());
     const barcodePngBuffer = await svgToPng(barcodeSvg);
     doc.image(barcodePngBuffer, 25, calculatedHeight + 30, {width: 200});
+    doc.font('Play').fontSize(10).text(ticket._id.toString(), 60, calculatedHeight + 67);
 
     // LEGAL TEXT
     doc.font('PlayBold').fontSize(14).text('ЦЕ ТВІЙ КВИТОК', 25, calculatedHeight + 80);
@@ -100,9 +102,33 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     doc.font('Play').fontSize(10).text('вул. Михайла Омеляновича-Павленка 4/6, Kyiv, Ukraine');
     doc.end();
 };
-//
+
 // createTicketPdf(
-//     { price: 250},
-//     {title: "Концерт жаби і гадюки", place: "Жопа кабана",address: "wwgewegwge", date: Date.now(), description: 'weweg weg weg  egw'},
-//     'F:/projects/kibalnik_back/uploads/images/67016312dde4a9a228bbb64d.jpg',
-//     'F:/projects/kibalnik_back/temp/out.pdf')
+//     new TicketModel(
+//         {
+//             price: 250, _id: new Types.ObjectId('682a243c8d873a885ad768a4'),
+//             event: undefined,
+//             code: '',
+//             discount: 0,
+//             data: '',
+//             scanned: false,
+//             mail: '',
+//             serviceFee: 0,
+//         },
+//     ),
+//     new EventModel(
+//         {
+//             title: "Концерт жаби і гадюки",
+//             place: "Жопа кабана",
+//             address: "wwgewegwge",
+//             date: Date.now(),
+//             description: 'weweg weg weg  egw',
+//             prices: [{
+//                 price: 250, place: 'ffwwfwf', description: "wffwwf",
+//                 _id: '',
+//                 available: 0
+//             }]
+//         },
+//     ),
+//     'E:/programming/projects/kibalnik_back/uploads/images/67016312dde4a9a228bbb64d.jpg',
+//     'E:/programming/projects/kibalnik_back/temp/outttt.pdf')
