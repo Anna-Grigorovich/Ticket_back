@@ -1,6 +1,11 @@
 const { spawn } = require('child_process');
 
-const imageName = `zorinalex/ticketsback`;
+const env = process.argv[2] || 'dev';
+
+const imageName = env === 'prod'
+    ? 'zorinalex/ticketsback_prod'
+    : 'zorinalex/ticketsback';
+
 const dockerfilePath = `./Dockerfile`;
 
 // Docker build and push commands
