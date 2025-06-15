@@ -11,6 +11,7 @@ import {EventModel} from "../mongo/models/event.model";
 import {EmailService} from "../services/mail.service";
 import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
 import {IAttachment} from "../services/mail.interfaces";
+import {MailResendService} from "../services/mail-resend.service";
 
 @Injectable()
 export class TicketsService {
@@ -19,7 +20,7 @@ export class TicketsService {
         private configService: ConfigService,
         private eventsRepository: EventRepository,
         private ticketsRepository: TicketRepository,
-        private mailService: EmailService
+        private mailService: MailResendService
     ) { }
 
     async findOne(id: string) {
@@ -48,7 +49,7 @@ export class TicketsService {
                 filename: `ticket_${i}.pdf`
             })
         }
-        await this.mailService.sendMail('topTickets', mail, event.title, attachments);
+        await this.mailService.sendMail('tickets@toptickets.com.ua', mail, event.title, attachments);
         attachments.forEach(attachment => {
             fs.unlink(attachment.path, () => {})
         })

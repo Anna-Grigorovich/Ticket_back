@@ -35,7 +35,8 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     const doc = new PDFDocument({size: 'A4', margins: {top: 50, left: 50, right: 50, bottom: 0}});
     doc.registerFont('Play', './resources/fonts/Play-Regular.ttf');
     doc.registerFont('PlayBold', './resources/fonts/Play-Bold.ttf');
-    doc.pipe(fs.createWriteStream(outputPath));
+    const stream = fs.createWriteStream(outputPath);
+    doc.pipe(stream);
 
     // POSTER IMAGE
     if (!fs.existsSync(posterPath)) {
@@ -101,6 +102,7 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     doc.font('Play').fontSize(10).text('mail: topticketspay@gmail.com');
     doc.font('Play').fontSize(10).text('вул. Михайла Омеляновича-Павленка 4/6, Kyiv, Ukraine');
     doc.end();
+    await new Promise(resolve => stream.on('finish', resolve));
 };
 
 // createTicketPdf(

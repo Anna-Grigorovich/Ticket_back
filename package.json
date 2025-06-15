@@ -51,6 +51,7 @@
     "pdfkit": "^0.15.0",
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.0",
+    "resend": "^4.6.0",
     "rxjs": "^7.8.1",
     "sharp": "^0.33.5",
     "xmldom": "^0.6.0"

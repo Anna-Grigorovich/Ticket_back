@@ -46,15 +46,18 @@ export class OrderService {
 
     async orderPayed(callbackModel: LiqPayCallbackModel): Promise<void> {
         const providerFee: number = callbackModel.agentCommission + callbackModel.receiverCommission;
-        const order = await this.orderRepository.update(callbackModel.orderId, {payed: true, providerFee, payment: callbackModel});
-        await this.eventsService.addToReport(order);
-        await this.ticketsService.createTickets(
-            order.event._id.toString(),
-            order.mail,
-            order.price,
-            order.serviceFee,
-            callbackModel,
-            order.quantity
-        )
+        const _order = await this.orderRepository.getById(callbackModel.orderId);
+        if(_order.payed === false) {
+            const order = await this.orderRepository.update(callbackModel.orderId, {payed: true, providerFee, payment: callbackModel});
+            await this.eventsService.addToReport(order);
+            await this.ticketsService.createTickets(
+                order.event._id.toString(),
+                order.mail,
+                order.price,
+                order.serviceFee,
+                callbackModel,
+                order.quantity
+            )
+        }
     }
 }

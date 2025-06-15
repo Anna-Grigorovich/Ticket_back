@@ -3,6 +3,7 @@ import { PaymentService } from './payment.service';
 import {ApiExcludeController, ApiOperation, ApiTags} from "@nestjs/swagger";
 import {OrderService} from "../order/order.service";
 import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
+import { Request } from 'express';
 
 @Controller('payment')
 @ApiTags('payment')
