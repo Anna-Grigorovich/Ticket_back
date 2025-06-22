@@ -14,14 +14,17 @@ async function bootstrap() {
   }));
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 3000;
+  const NODE_ENV = configService.get<string>('NODE_ENV') || 'production';
 
-  const config = new DocumentBuilder()
-      .setTitle('TopTickets')
-      .setDescription('TopTickets api')
-      .setVersion('1.01')
-      .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, documentFactory);
+  if (NODE_ENV === 'development') {
+    const config = new DocumentBuilder()
+        .setTitle('TopTickets')
+        .setDescription('TopTickets api')
+        .setVersion('1.01')
+        .build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('swagger', app, documentFactory);
+  }
 
   await app.listen(PORT, ()=> {
     logger.log(`Test Application is running on port: ${PORT}`)
