@@ -10,6 +10,8 @@ export class EventResponseDto {
     @ApiProperty()
     title: string;
     @ApiProperty()
+    url: string;
+    @ApiProperty()
     place: string;
     @ApiProperty()
     address: string;
@@ -40,6 +42,7 @@ export class EventResponseDto {
         return new EventResponseDto({
             _id: doc._id.toString(),
             title: doc.title,
+            url: doc.url,
             place: doc.place,
             address: doc.address,
             description: doc.description,
@@ -58,6 +61,7 @@ export class EventResponseDto {
         return {
             _id: model._id.toString(),
             title: model.title,
+            url: model.url,
             place: model.place,
             address: model.address,
             description: model.description,

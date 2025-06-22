@@ -8,6 +8,8 @@ export class CreateEventResponseDto {
     @ApiProperty()
     title: string;
     @ApiProperty()
+    url: string;
+    @ApiProperty()
     place: string;
     @ApiProperty()
     address: string;

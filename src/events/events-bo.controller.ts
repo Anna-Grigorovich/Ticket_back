@@ -87,7 +87,7 @@ export class EventsBoController {
     @ApiBody({type: CloseEventDto})
     @ApiResponse({type: CreateEventResponseDto})
     async close(@Body() closeEventDto: CloseEventDto): Promise<void> {
-        await this.eventsService.closeEvent(closeEventDto.eventId);
+        await this.eventsService.stopEventSell(closeEventDto.eventId);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

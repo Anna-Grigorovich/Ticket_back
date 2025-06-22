@@ -7,6 +7,7 @@ import {
     Logger
 } from "@nestjs/common";
 import {Request, Response} from "express";
+import {sanitizeUser} from "../utils/sanitizeUser";
 
 @Catch()
 export class ExceptionsFilter implements ExceptionFilter{
@@ -37,7 +38,7 @@ export class ExceptionsFilter implements ExceptionFilter{
         };
         this.logger.error(`Response Code: ${errorResponse.statusCode}; Method: ${errorResponse.method}; URL: ${errorResponse.path}; IP: ${ip}`,
             exception['stack'],
-            (request.user)? `User: ${JSON.stringify(request.user) || "Not signed"}`: '');
+            (request.user)? `User: ${JSON.stringify(sanitizeUser(request.user)) || "Not signed"}`: '');
 
         response.status(status).json(errorResponse);
     }

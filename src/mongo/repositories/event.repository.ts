@@ -129,6 +129,10 @@ export class EventRepository {
         return await this.model.findOne({ _id: id, show: true }).exec();
     }
 
+    async getByUrl(url: string): Promise<EventDocument | null> {
+        return await this.model.findOne({ url: url, show: true }).exec();
+    }
+
     async getReportById(id: string): Promise<EventDocument | null> {
         return await this.model.findOne({ _id: id, ended: true }).exec();
     }
@@ -156,6 +160,12 @@ export class EventRepository {
             },
             { $set: { sellEnded: true } }
         );
+    }
+
+    async stopEventSell(id: string): Promise<void> {
+        await this.model.findByIdAndUpdate(id, {
+            sellEnded: true,
+        }).exec();
     }
 
     async getEventsToClose(): Promise<EventDocument[]> {

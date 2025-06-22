@@ -8,6 +8,8 @@ import {EventReportDocument, EventReportSchema} from "./event-report.data";
 export class Event {
     @Prop()
     title: string;
+    @Prop({ unique: true, index: true })
+    url: string;
     @Prop()
     place: string;
     @Prop()

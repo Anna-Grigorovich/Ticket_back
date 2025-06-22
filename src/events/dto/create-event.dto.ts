@@ -16,6 +16,9 @@ export class CreateEventDto {
     @ApiProperty({ description: 'Event name', example: 'Music Festival' })
     title: string;
     @IsNotEmpty()
+    @ApiProperty({ description: 'Event unique url', example: 'Music-Festival' })
+    url: string;
+    @IsNotEmpty()
     @ApiProperty({ description: 'Event place', example: 'Caribbean club' })
     place: string;
     @IsNotEmpty()

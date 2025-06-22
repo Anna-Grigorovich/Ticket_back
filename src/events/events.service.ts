@@ -33,7 +33,14 @@ export class EventsService {
     }
 
     async create(createEventDto: CreateEventDto) {
-        return await this.eventsRepository.create(createEventDto);
+        try{
+            return await this.eventsRepository.create(createEventDto);
+        }catch (e) {
+            if(e.code === 11000){
+                throw new BadRequestException('Url should be unique');
+            }
+            throw e
+        }
     }
 
     async getList(params: FindEventDto): Promise<EventListDto> {
@@ -101,6 +108,12 @@ export class EventsService {
         return event
     }
 
+    async findOneByUrl(url: string) {
+        const event = await this.eventsRepository.getByUrl(url)
+        if (!event) throw new NotFoundException('Not Found');
+        return event
+    }
+
     async validatePrice(id: string, price: number, quantity: number): Promise<EventModel> {
         const event = EventModel.fromDoc(await this.eventsRepository.getById(id, true))
         if (!event) throw new BadRequestException('Not Found');
@@ -118,7 +131,14 @@ export class EventsService {
     async update(id: string, updateEventDto: UpdateEventDto) {
         const event = EventModel.fromDoc(await this.eventsRepository.getById(id, true))
         if(event.ended) throw new BadRequestException('Cannot edit ended event');
-        return await this.eventsRepository.updateById(id, updateEventDto)
+        try{
+            return await this.eventsRepository.updateById(id, updateEventDto)
+        }catch (e) {
+            if(e.code === 11000){
+                throw new BadRequestException('Url should be unique');
+            }
+            throw e
+        }
     }
 
     async remove(id: string) {
@@ -184,6 +204,20 @@ export class EventsService {
         await this.ordersRepository.cleanUp(id);
 
         this.logger.log(`Event ${id} closed successfully.`);
+    }
+
+    async stopEventSell(id: string): Promise<void> {
+        const event = await this.eventsRepository.getById(id, true);
+        if (!event) {
+            throw new Error('Event not found');
+        }
+        if (event.ended) {
+            throw new Error('Event is already closed.');
+        }
+
+        await this.eventsRepository.stopEventSell(id);
+
+        this.logger.log(`Event ${id} sell ended successfully.`);
     }
 
 }

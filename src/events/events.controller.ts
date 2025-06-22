@@ -26,7 +26,16 @@ export class EventsController {
         ) {
     }
 
-    @Get(':id')
+    @Get(':url')
+    @ApiOperation({ summary: 'Retrieve a single event by its url' })
+    @ApiParam({ name: 'url', description: 'The url of the event', type: String })
+    @ApiResponse({type: EventResponseDto})
+    async findOneByUrl(@Param('url') url: string): Promise<EventResponseDto> {
+        const settings: SettingsModel = this.settingsService.getSettings();
+        return EventResponseDto.fromDoc(await this.eventsService.findOneByUrl(url), settings.serviceFee);
+    }
+
+    @Get('id/:id')
     @ApiOperation({ summary: 'Retrieve a single event by its ID' })
     @ApiParam({ name: 'id', description: 'The ID of the event', type: String })
     @ApiResponse({type: EventResponseDto})

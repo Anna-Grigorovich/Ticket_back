@@ -8,6 +8,7 @@ import {ReportModel} from "./report.model";
 export class EventModel {
     _id: ObjectId;
     title: string;
+    url: string;
     place: string;
     address: string;
     description: string;
@@ -30,6 +31,7 @@ export class EventModel {
         return new EventModel({
             _id: doc._id,
             title: doc.title,
+            url: doc.url,
             place: doc.place,
             address: doc.address,
             description: doc.description,
