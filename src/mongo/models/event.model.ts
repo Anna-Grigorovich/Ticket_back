@@ -38,7 +38,7 @@ export class EventModel {
             date: doc.date,
             dateEnd: doc.dateEnd,
             ended: doc.ended,
-            sellEnded: doc.ended,
+            sellEnded: doc.sellEnded,
             prices: doc.prices?.map(p=>EventPriceModel.fromDoc(p)),
             image: doc.image,
             show: doc.show,
