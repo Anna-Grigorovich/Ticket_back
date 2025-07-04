@@ -8,7 +8,6 @@ import {EventRepository} from "../mongo/repositories/event.repository";
 import {TicketRepository} from "../mongo/repositories/ticket.repository";
 import {TicketModel} from "../mongo/models/ticket.model";
 import {EventModel} from "../mongo/models/event.model";
-import {EmailService} from "../services/mail.service";
 import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
 import {IAttachment} from "../services/mail.interfaces";
 import {MailResendService} from "../services/mail-resend.service";
@@ -21,7 +20,9 @@ export class TicketsService {
         private eventsRepository: EventRepository,
         private ticketsRepository: TicketRepository,
         private mailService: MailResendService
-    ) { }
+    ) {
+        // this.generateTestTicket()
+    }
 
     async findOne(id: string) {
         const ticket = await this.ticketsRepository.getById(id)
@@ -53,6 +54,13 @@ export class TicketsService {
         attachments.forEach(attachment => {
             fs.unlink(attachment.path, () => {})
         })
+    }
+
+    protected async generateTestTicket() {
+        const ticket : TicketModel = await this.ticketsRepository.getById('6867be8c46bc38530435dcbd');
+        console.log(ticket);
+        const pdfPath = await this.generateTicketPdf(ticket, ticket.event);
+        console.log(`PDF generated at: ${pdfPath}`);
     }
 
     protected async generateTicketPdf(ticket: TicketModel, event: EventModel): Promise<string> {

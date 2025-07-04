@@ -25,6 +25,7 @@ const formatTimestampToUkrainian = (timestamp: number) => {
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Europe/Kyiv',
     };
     const formattedDate = new Intl.DateTimeFormat('uk-UA', options).format(date);
     return formattedDate;
@@ -57,10 +58,10 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     const barcodeSvg = generateBarcode(ticket._id.toString());
     const barcodePngBuffer = await svgToPng(barcodeSvg);
     doc.image(barcodePngBuffer, 25, calculatedHeight + 30, {width: 200});
-    doc.font('Play').fontSize(10).text(ticket._id.toString(), 60, calculatedHeight + 67);
+    doc.font('Play').fontSize(8).text(ticket._id.toString(), 70, calculatedHeight + 70);
 
     // LEGAL TEXT
-    doc.font('PlayBold').fontSize(14).text('ЦЕ ТВІЙ КВИТОК', 25, calculatedHeight + 80);
+    doc.font('PlayBold').fontSize(14).text('ЦЕ ТВІЙ КВИТОК', 25, calculatedHeight + 90);
     doc.fontSize(8).text('РОЗДРУКУЙТЕ АБО ПОКАЖІТЬ ЦЕЙ КВИТОК З ТЕЛЕФОНА', {width: 200, align: 'justify'});
     doc.font('Play').fontSize(8).text('Унікальний штрих-код може бути використаний лише один раз. Не копіюйте цей квиток і не публікуйте його в інтернеті. Це може стати перешкодою вашого входу на подію. За збереження даних організатор відповідальності не несе.', {
         width: 200,
@@ -104,33 +105,3 @@ export const createTicketPdf = async (ticket: TicketModel, eventData: EventModel
     doc.end();
     await new Promise(resolve => stream.on('finish', resolve));
 };
-
-// createTicketPdf(
-//     new TicketModel(
-//         {
-//             price: 250, _id: new Types.ObjectId('682a243c8d873a885ad768a4'),
-//             event: undefined,
-//             code: '',
-//             discount: 0,
-//             data: '',
-//             scanned: false,
-//             mail: '',
-//             serviceFee: 0,
-//         },
-//     ),
-//     new EventModel(
-//         {
-//             title: "Концерт жаби і гадюки",
-//             place: "Жопа кабана",
-//             address: "wwgewegwge",
-//             date: Date.now(),
-//             description: 'weweg weg weg  egw',
-//             prices: [{
-//                 price: 250, place: 'ffwwfwf', description: "wffwwf",
-//                 _id: '',
-//                 available: 0
-//             }]
-//         },
-//     ),
-//     'E:/programming/projects/kibalnik_back/uploads/images/67016312dde4a9a228bbb64d.jpg',
-//     'E:/programming/projects/kibalnik_back/temp/outttt.pdf')
