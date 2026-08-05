@@ -174,7 +174,7 @@ export class EventsService {
             }
 
             const image = await Jimp.read(file.buffer);
-            image.resize({w: 400});
+            image.resize({w: 1000});
             const filePath = path.join(outputFilePath, `${id}.jpg`);
             // @ts-ignore
             await image.write(filePath);
