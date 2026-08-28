@@ -1,15 +1,18 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
 import {OrderModel} from "../mongo/models/order.model";
 import {PaymentData} from "./interfaces/payment-data.interface";
 import {LiqPayCallbackModel} from "../mongo/models/payment-result.model";
+import {roundPrice} from "../utils/number-util";
 
 @Injectable()
 export class PaymentService implements OnModuleInit {
     private publicKey: string;
     private privateKey: string;
+    private rroItemId: string;
+    private readonly logger = new Logger(PaymentService.name);
     private readonly host = 'https://www.liqpay.ua/api/';
     private readonly buttonText = 'Сплатити';
 
@@ -18,6 +21,24 @@ export class PaymentService implements OnModuleInit {
     onModuleInit(): void {
         this.publicKey = this.configService.get<string>('LIQ_PUBLIC');
         this.privateKey = this.configService.get<string>('LIQ_PRIVATE');
+        this.rroItemId = this.configService.get<string>('LIQ_RRO_ITEM_ID');
+        if (!this.rroItemId) {
+            this.logger.warn('LIQ_RRO_ITEM_ID is not set, payments will not be fiscalized');
+        }
+    }
+
+    private buildRroInfo(order: OrderModel): Record<string, any> {
+        const rroInfo: Record<string, any> = { delivery_emails: [order.mail] };
+        if (!this.rroItemId) return rroInfo;
+
+        const price = roundPrice(order.price + order.serviceFee);
+        rroInfo.items = [{
+            id: this.rroItemId,
+            price,
+            amount: order.quantity,
+            cost: roundPrice(price * order.quantity)
+        }];
+        return rroInfo;
     }
 
     private strToSign(str: string): string {
@@ -110,32 +131,28 @@ export class PaymentService implements OnModuleInit {
     getPaymentForm(order: OrderModel){
         return this.generatePaymentForm({
             action: 'pay',
-            amount: (order.price + order.serviceFee) * order.quantity,
+            amount: roundPrice(roundPrice(order.price + order.serviceFee) * order.quantity),
             currency: 'UAH',
             description: order.event.title,
             order_id: order._id,
             version: 3,
             server_url: `${this.configService.get('SERVER_URL')}/payment/callback`,
             result_url: `${this.configService.get('RESULT_URL')}/success`,
-            rro_info: {
-                delivery_emails: [order.mail]
-            }
+            rro_info: this.buildRroInfo(order)
         });
     }
 
     getPaymentData(order: OrderModel): PaymentData{
         return this.generatePaymentObject({
             action: 'pay',
-            amount: (order.price + order.serviceFee) * order.quantity,
+            amount: roundPrice(roundPrice(order.price + order.serviceFee) * order.quantity),
             currency: 'UAH',
             description: order.event.title,
             order_id: order._id,
             version: 3,
             server_url: `${this.configService.get('SERVER_URL')}/payment/callback`,
             result_url: `${this.configService.get('RESULT_URL')}/success`,
-            rro_info: {
-                delivery_emails: [order.mail]
-            }
+            rro_info: this.buildRroInfo(order)
         });
     }
 }
