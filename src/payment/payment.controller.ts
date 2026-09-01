@@ -29,6 +29,9 @@ export class PaymentController {
     const decodedData = JSON.parse(Buffer.from(data, 'base64').toString('utf-8'));
     const liqPayModel = LiqPayCallbackModel.fromLiqPayCallback(decodedData);
     this.logger.log(JSON.stringify(decodedData))
+    if(decodedData.rro_receipt_status && decodedData.rro_receipt_status !== 'success') {
+      this.logger.error(`Fiscalization failed for order ${decodedData.order_id}: ${decodedData.rro_receipt_status} ${decodedData.rro_err_description}`)
+    }
     if(liqPayModel.status === 'success') {
       try {
         await this.orderService.orderPayed(liqPayModel)

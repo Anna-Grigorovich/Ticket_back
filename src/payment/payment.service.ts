@@ -11,7 +11,7 @@ import {roundPrice} from "../utils/number-util";
 export class PaymentService implements OnModuleInit {
     private publicKey: string;
     private privateKey: string;
-    private rroItemId: string;
+    private rroItemId: number;
     private readonly logger = new Logger(PaymentService.name);
     private readonly host = 'https://www.liqpay.ua/api/';
     private readonly buttonText = 'Сплатити';
@@ -21,23 +21,27 @@ export class PaymentService implements OnModuleInit {
     onModuleInit(): void {
         this.publicKey = this.configService.get<string>('LIQ_PUBLIC');
         this.privateKey = this.configService.get<string>('LIQ_PRIVATE');
-        this.rroItemId = this.configService.get<string>('LIQ_RRO_ITEM_ID');
-        if (!this.rroItemId) {
+        const rawItemId = this.configService.get<string>('LIQ_RRO_ITEM_ID');
+        if (!rawItemId) {
             this.logger.warn('LIQ_RRO_ITEM_ID is not set, payments will not be fiscalized');
+        } else if (isNaN(Number(rawItemId))) {
+            this.logger.warn(`LIQ_RRO_ITEM_ID is not a number: ${rawItemId}`);
+        } else {
+            this.rroItemId = Number(rawItemId);
         }
     }
 
     private buildRroInfo(order: OrderModel): Record<string, any> {
         const rroInfo: Record<string, any> = { delivery_emails: [order.mail] };
-        if (!this.rroItemId) return rroInfo;
-
-        const price = roundPrice(order.price + order.serviceFee);
-        rroInfo.items = [{
-            id: this.rroItemId,
-            price,
-            amount: order.quantity,
-            cost: roundPrice(price * order.quantity)
-        }];
+        if (this.rroItemId) {
+            const price = roundPrice(order.price + order.serviceFee);
+            rroInfo.items = [{
+                id: this.rroItemId,
+                price,
+                amount: order.quantity,
+                cost: roundPrice(price * order.quantity)
+            }];
+        }
         return rroInfo;
     }
 
@@ -71,6 +75,7 @@ export class PaymentService implements OnModuleInit {
             }
         });
 
+        this.logger.log(`LiqPay payload: ${JSON.stringify(params)}`);
         return params;
     }
 
